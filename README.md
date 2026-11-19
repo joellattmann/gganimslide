@@ -16,7 +16,7 @@ remotes::install_github("joellattmann/gganimslide")
 
 All dependencies (`ggplot2`, `officer`, `rvg`, `xml2`) are installed automatically.
 
-The following code creates a PowerPoint presentation in your working directory that animates the layers (e.g., geoms) of a `ggplot2` object (*p*). Positive numbers in `animate` mark the layer at which a step *animates in* (each step runs up to the next number); negative numbers *animate out* the step that started at that layer. Except for the plot and the file name, all arguments can be left blank, using the defaults: every layer of the plot *appears* on *click*, while axes, titles and legend are shown from the start.
+The following code creates a PowerPoint presentation in your working directory that animates the layers (e.g., geoms) of a `ggplot2` object (p). Positive numbers in `animate` mark the layer at which a step *animates in* (each step runs up to the next number); negative numbers *animate out* the step that started at that layer. Except for the plot and the file name, all arguments can be left blank, using the defaults: every layer of the plot *appears* on *click*, while axes, titles and legend are shown from the start.
 ```r
 ggppt(p, "savings.pptx",
       animate  = c(1, 2, 3, 5, 6, 8, -8),
