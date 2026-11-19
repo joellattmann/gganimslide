@@ -75,7 +75,7 @@ ggppt <- function(p, file = NULL, animate = NULL,
     gt <- plot_gtable(p)
     st <- animation_steps(gt$n_layers, animate)
     n <- length(st$steps)
-    frames <- c(list(frame_with_layers(gt, st$static)),
+    frames <- c(list(unclip_panel_border(frame_with_layers(gt, st$static), gt$n_layers)),
                 lapply(st$steps, function(l) overlay_with_layers(gt, l)))
     base_label <- if (length(st$static)) {
       paste0("plot base (layers ", paste(st$static, collapse = ", "), ")")
@@ -85,7 +85,9 @@ ggppt <- function(p, file = NULL, animate = NULL,
   } else {
     cf <- component_frames(comp, animate, scope)
     n <- length(cf$labels)
-    frames <- lapply(cf$frames, ggplot2::ggplotGrob)
+    frames <- lapply(cf$frames, function(fp) {
+      unclip_panel_border(ggplot2::ggplotGrob(fp), length(fp$layers))
+    })
     labels <- c(paste("plot", cf$static_label), sprintf("step %d: %s", seq_len(n), cf$labels))
     bgs <- rep(bg, n + 1)
   }

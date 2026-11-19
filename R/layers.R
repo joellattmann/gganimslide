@@ -123,3 +123,33 @@ is_gg <- function(x) {
   f <- if (exists("is_ggplot", envir = ns, inherits = FALSE)) get("is_ggplot", envir = ns) else get("is.ggplot", envir = ns)
   isTRUE(f(x))
 }
+
+# Draw the panel foreground (panel.border) outside the panel's clipping
+# region. Some PowerPoint renderers drop border lines that lie exactly on the
+# clip boundary; moving the border to its own unclipped gtable cell on top
+# keeps all four sides. Used for the PowerPoint output only.
+unclip_panel_border <- function(g, n_layers) {
+  panel_idx <- grep("^panel", g$layout$name)
+  z_top <- max(g$layout$z, na.rm = TRUE)
+  for (i in panel_idx) {
+    panel <- g$grobs[[i]]
+    kids <- panel$children
+    lead <- (length(kids) - n_layers) / 2
+    if (!inherits(panel, "gTree") || lead < 1 || lead %% 1 != 0) next
+    fg_idx <- seq.int(length(kids) - lead + 1, length(kids))
+    fg <- kids[fg_idx]
+    for (j in fg_idx) {
+      z <- ggplot2::zeroGrob()
+      z$name <- paste0("gganimslide-moved-", j)
+      kids[[j]] <- z
+    }
+    g$grobs[[i]] <- grid::setChildren(panel, do.call(grid::gList, unname(as.list(kids))))
+    row <- g$layout[i, , drop = FALSE]
+    row$clip <- "off"
+    row$z <- z_top + 1
+    row$name <- paste0("gganimslide-border-", row$name)
+    g$grobs[[length(g$grobs) + 1]] <- grid::gTree(children = do.call(grid::gList, unname(as.list(fg))))
+    g$layout <- rbind(g$layout, row)
+  }
+  g
+}
