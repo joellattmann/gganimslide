@@ -9,6 +9,13 @@
 
 Reveal the layers of a saved ggplot step by step, in **PowerPoint** or **LaTeX beamer**.
 
+```r
+# install.packages("remotes")
+remotes::install_github("joellattmann/gganimslide")
+```
+
+All dependencies (ggplot2, officer, rvg, xml2) are installed automatically.
+
 The following code creates a PowerPoint presentation in your working directory that animates the layers (e.g., geoms) of a `ggplot2` object (*p*). Positive numbers in `animate` mark the layer at which a step *animates in* (each step runs up to the next number); negative numbers *animate out* the step that started at that layer. Except for the plot and the file name, all arguments can be left blank, using the defaults: every layer of the plot *appears* on *click*, while axes, titles and legend are shown from the start.
 ```r
 ggppt(p, "savings.pptx",
@@ -62,14 +69,6 @@ ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_fr
 | `animation_steps()` | previews how an `animate` vector is split into steps, e.g., `animation_steps(6, c(3, 4, 5))` |
 | `steps()` | fallback: stores the component order for plots made without gganimslide loaded |
 
-## Install
-
-```r
-# install.packages("remotes")
-remotes::install_github("joellattmann/gganimslide")
-```
-
-All dependencies (ggplot2, officer, rvg, xml2) are installed automatically.
 
 ## scope: what the numbers count
 
