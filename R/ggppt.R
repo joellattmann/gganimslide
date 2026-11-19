@@ -28,7 +28,10 @@
 #' @param duration Effect duration in seconds (ignored for `"appear"`).
 #' @param doc Optional existing `rpptx` object (from [officer::read_pptx()]) to
 #'   add the slide to. Lets you build a whole deck with several plots.
-#' @param template Optional `.pptx` template whose theme is used for a new deck.
+#' @param template Optional `.pptx` template whose theme and slide size are
+#'   used for a new deck.
+#' @param size Slide size of a new deck when no `template` is given:
+#'   `"16:9"` (default) or `"4:3"`. Ignored when `doc` or `template` is given.
 #' @param location Optional officer location for the plot, e.g.
 #'   `officer::ph_location(left = 1, top = 1.5, width = 8, height = 5)`.
 #'   Defaults to the area below the title.
@@ -50,9 +53,10 @@
 ggppt <- function(p, file = NULL, animate = NULL,
                   scope = c("layers", "all", "all_but_theme"), title = NULL,
                   effect = "appear", trigger = "click", duration = 0.5,
-                  doc = NULL, template = NULL, location = NULL,
+                  doc = NULL, template = NULL, size = c("16:9", "4:3"), location = NULL,
                   editable = TRUE, bg = "white", ...) {
   scope <- match.arg(scope)
+  size <- match.arg(size)
   comp <- if (scope != "layers") {
     resolve_components(substitute(p), parent.frame(), p, required = TRUE)
   }
@@ -80,7 +84,12 @@ ggppt <- function(p, file = NULL, animate = NULL,
   trigger <- check_choice(rep_len(trigger, n), trigger_names, "trigger")
   duration <- rep_len(duration, n)
 
-  if (is.null(doc)) doc <- officer::read_pptx(template)
+  if (is.null(doc)) {
+    if (is.null(template) && size == "16:9") {
+      template <- system.file("templates", "16x9.pptx", package = "gganimslide")
+    }
+    doc <- officer::read_pptx(template)
+  }
   if (!inherits(doc, "rpptx")) stop("`doc` must be an rpptx object from officer::read_pptx().", call. = FALSE)
   slide <- add_plot_slide(doc, title)
   doc <- slide$doc
@@ -151,4 +160,29 @@ last_shape_id <- function(doc) {
   id <- xml2::xml_attr(xml2::xml_find_first(kids[[length(kids)]], "./*[1]/p:cNvPr", ns), "id")
   if (is.na(id)) stop("Could not find the id of the inserted shape.", call. = FALSE)
   id
+}
+
+#' Start a new PowerPoint deck
+#'
+#' Like [officer::read_pptx()], but a new deck is 16:9 by default (officer's
+#' own default is 4:3). Use it to build a deck with several plots via the `doc`
+#' argument of [ggppt()].
+#'
+#' @param size `"16:9"` (default) or `"4:3"`. Ignored if `template` is given.
+#' @param template Optional `.pptx` template (its own size is kept).
+#' @return An `rpptx` object.
+#' @examples
+#' \dontrun{
+#' doc <- ppt_deck()
+#' doc <- ggppt(p1, doc = doc, title = "First")
+#' doc <- ggppt(p2, doc = doc, title = "Second")
+#' print(doc, target = "talk.pptx")
+#' }
+#' @export
+ppt_deck <- function(size = c("16:9", "4:3"), template = NULL) {
+  size <- match.arg(size)
+  if (is.null(template) && size == "16:9") {
+    template <- system.file("templates", "16x9.pptx", package = "gganimslide")
+  }
+  officer::read_pptx(template)
 }

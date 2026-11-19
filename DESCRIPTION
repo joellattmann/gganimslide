@@ -20,6 +20,6 @@ Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2026-11-19 13:31:22 UTC; root
+Packaged: 2026-11-19 14:04:25 UTC; root
 Author: Joël Frédéric Lattmann [aut, cre]
 Maintainer: Joël Frédéric Lattmann <jlattmann@student.ethz.ch>

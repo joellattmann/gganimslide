@@ -15,6 +15,7 @@ ggppt(
   duration = 0.5,
   doc = NULL,
   template = NULL,
+  size = c("16:9", "4:3"),
   location = NULL,
   editable = TRUE,
   bg = "white",
@@ -51,7 +52,11 @@ titles or themes change the layout.}
 \item{doc}{Optional existing `rpptx` object (from [officer::read_pptx()]) to
 add the slide to. Lets you build a whole deck with several plots.}
 
-\item{template}{Optional `.pptx` template whose theme is used for a new deck.}
+\item{template}{Optional `.pptx` template whose theme and slide size are
+used for a new deck.}
+
+\item{size}{Slide size of a new deck when no `template` is given:
+`"16:9"` (default) or `"4:3"`. Ignored when `doc` or `template` is given.}
 
 \item{location}{Optional officer location for the plot, e.g.
 `officer::ph_location(left = 1, top = 1.5, width = 8, height = 5)`.
