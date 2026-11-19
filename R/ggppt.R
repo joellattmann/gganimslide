@@ -32,7 +32,15 @@
 #'   used for a new deck.
 #' @param size Slide size of a new deck when no `template` is given:
 #'   `"16:9"` (default) or `"4:3"`. Ignored when `doc` or `template` is given.
-#' @param location Optional officer location for the plot, e.g.
+#' @param width,height Size of the plot on the slide in inches. Default: the
+#'   free area below the title. Set the size here rather than by dragging in
+#'   PowerPoint: dragging scales lines and points but not text, and resizing
+#'   one step's shape misaligns it with the others. A full 16:9 slide is
+#'   13.33 x 7.5 inches.
+#' @param left,top Position of the plot's top-left corner in inches. Default:
+#'   centred in the free area below the title.
+#' @param location Optional officer location for the plot (overrides
+#'   `width`, `height`, `left`, `top`), e.g.
 #'   `officer::ph_location(left = 1, top = 1.5, width = 8, height = 5)`.
 #'   Defaults to the area below the title.
 #' @param editable If `TRUE`, the shapes and text of the plot can be edited
@@ -53,7 +61,8 @@
 ggppt <- function(p, file = NULL, animate = NULL,
                   scope = c("layers", "all", "all_but_theme"), title = NULL,
                   effect = "appear", trigger = "click", duration = 0.5,
-                  doc = NULL, template = NULL, size = c("16:9", "4:3"), location = NULL,
+                  doc = NULL, template = NULL, size = c("16:9", "4:3"),
+                  width = NULL, height = NULL, left = NULL, top = NULL, location = NULL,
                   editable = TRUE, bg = "white", ...) {
   scope <- match.arg(scope)
   size <- match.arg(size)
@@ -93,7 +102,11 @@ ggppt <- function(p, file = NULL, animate = NULL,
   if (!inherits(doc, "rpptx")) stop("`doc` must be an rpptx object from officer::read_pptx().", call. = FALSE)
   slide <- add_plot_slide(doc, title)
   doc <- slide$doc
-  loc <- if (is.null(location)) slide$location else officer::fortify_location(location, doc = doc)
+  loc <- if (!is.null(location)) {
+    officer::fortify_location(location, doc = doc)
+  } else {
+    place_plot(slide$location, width, height, left, top)
+  }
 
   spids <- character(length(frames))
   for (k in seq_along(frames)) {
@@ -185,4 +198,15 @@ ppt_deck <- function(size = c("16:9", "4:3"), template = NULL) {
     template <- system.file("templates", "16x9.pptx", package = "gganimslide")
   }
   officer::read_pptx(template)
+}
+
+# Fit a plot of the given size into the free area (centred unless left/top given).
+place_plot <- function(area, width, height, left, top) {
+  w <- if (is.null(width)) area$width else width
+  h <- if (is.null(height)) area$height else height
+  list(
+    left = if (is.null(left)) area$left + (area$width - w) / 2 else left,
+    top = if (is.null(top)) area$top + (area$height - h) / 2 else top,
+    width = w, height = h
+  )
 }

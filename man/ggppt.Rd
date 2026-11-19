@@ -16,6 +16,10 @@ ggppt(
   doc = NULL,
   template = NULL,
   size = c("16:9", "4:3"),
+  width = NULL,
+  height = NULL,
+  left = NULL,
+  top = NULL,
   location = NULL,
   editable = TRUE,
   bg = "white",
@@ -58,7 +62,17 @@ used for a new deck.}
 \item{size}{Slide size of a new deck when no `template` is given:
 `"16:9"` (default) or `"4:3"`. Ignored when `doc` or `template` is given.}
 
-\item{location}{Optional officer location for the plot, e.g.
+\item{width, height}{Size of the plot on the slide in inches. Default: the
+free area below the title. Set the size here rather than by dragging in
+PowerPoint: dragging scales lines and points but not text, and resizing
+one step's shape misaligns it with the others. A full 16:9 slide is
+13.33 x 7.5 inches.}
+
+\item{left, top}{Position of the plot's top-left corner in inches. Default:
+centred in the free area below the title.}
+
+\item{location}{Optional officer location for the plot (overrides
+`width`, `height`, `left`, `top`), e.g.
 `officer::ph_location(left = 1, top = 1.5, width = 8, height = 5)`.
 Defaults to the area below the title.}
 

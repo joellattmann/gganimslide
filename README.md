@@ -88,6 +88,7 @@ In these modes each step is a full redraw (titles or themes can change the layou
 * **Native PowerPoint animations** are written into the slide, so there is nothing to set up by hand. The shapes are named in the Selection Pane (e.g. `step 2: layer 4 geom_smooth`), and you can still change the effects in PowerPoint's Animation Pane.
 * `effect`: `"appear"` (default), `"fade"`, `"wipe_left"`, `"wipe_right"`, `"wipe_up"`, `"wipe_down"`. Give one value, or one per step.
 * `size`: `"16:9"` (default) or `"4:3"` for new decks; a `template` keeps its own size.
+* `width`, `height`, `left`, `top`: size and position of the plot in inches (default: the area below the title; the plot is centred unless `left`/`top` are given). **Set the size here, not by dragging in PowerPoint:** dragging doesn't scale the text, and resizing a single step's shape misaligns it with the others.
 * `trigger`: `"click"` (default), `"after"`, `"with"`. Give one value, or one per step.
 * Build a deck with several plots:
 
