@@ -11,6 +11,10 @@
 #'   entry are always shown; the last entry also reveals all later layers.
 #'   `animate = c(3, 4, 5)` shows layers 1-2, then adds 3, then 4, then 5 and
 #'   everything after it. `NULL` (default) reveals every layer on its own.
+#'   A negative number removes a step again: `-3` makes the step that started
+#'   at layer 3 disappear (with the given `effect` as exit animation in
+#'   PowerPoint), e.g. `animate = c(3, 4, 5, -3)`. Entries play in the order
+#'   given, and `effect`, `trigger` and `duration` count removals as steps.
 #' @param scope What the numbers in `animate` count. `"layers"` (default):
 #'   only geoms, stats and annotations; axes, titles, legend and theme are
 #'   always shown. `"all"`: every `+` component of the plot in the order it was
@@ -52,15 +56,10 @@ ggtex <- function(p, file = "plot.pdf", animate = NULL,
   if (scope == "layers") {
     gt <- plot_gtable(p)
     st <- animation_steps(gt$n_layers, animate)
-    # Page 1: static layers only; page k + 1: static layers + first k steps.
-    shown <- st$static
-    pages <- list(frame_with_layers(gt, shown))
-    for (k in seq_along(st$steps)) {
-      shown <- c(shown, st$steps[[k]])
-      pages[[k + 1]] <- frame_with_layers(gt, shown)
-    }
+    # Page 1: static part; then one page per entry of the sequence.
+    pages <- lapply(shown_after_each(st), function(l) frame_with_layers(gt, l))
     info <- c(if (length(st$static)) paste("static", paste(st$static, collapse = ",")) else "axes",
-              step_labels(p, st$steps))
+              seq_labels(p, st))
   } else {
     comp <- resolve_components(substitute(p), parent.frame(), p, required = TRUE)
     cf <- component_frames(comp, animate, scope)

@@ -9,40 +9,86 @@
 
 #' Work out the animation steps from `animate`
 #'
-#' `animate` lists the layers at which a new step starts. Layers before the
-#' first entry are static. Each step shows its layer and every following layer
-#' up to the next entry; the last step shows its layer and all layers after it.
+#' Positive numbers in `animate` are the layers at which a new step starts.
+#' Layers before the first positive number are static. Each step shows its
+#' layer and every following layer up to the next positive number; the last
+#' one also shows all layers after it. A negative number `-k` removes the step
+#' that started at layer `k` again (it fades out, or disappears). The entries
+#' are played in the order given.
 #'
 #' @param n_layers Number of layers in the plot.
 #' @param animate `NULL` (every layer is its own step) or an integer vector.
-#' @return A list with `static` (integer vector of layers always shown) and
-#'   `steps` (list of integer vectors, one per step).
+#' @return A list with `static` (layers always shown), `steps` (list of layer
+#'   vectors, one per step that appears) and `sequence` (data frame with one
+#'   row per entry: `action` `"in"` or `"out"`, and the `step` it refers to).
 #' @examples
 #' # Six layers, animate = c(3, 4, 5):
 #' # layers 1-2 static, then 3, then 4, then 5 and 6 together
 #' animation_steps(6, c(3, 4, 5))
+#'
+#' # ... and then layer 3 disappears again
+#' animation_steps(6, c(3, 4, 5, -3))
 #' @export
 animation_steps <- function(n_layers, animate = NULL) {
   if (n_layers < 1) stop("The plot has no layers.", call. = FALSE)
   if (is.null(animate)) animate <- seq_len(n_layers)
-  if (!is.numeric(animate) || anyNA(animate) || any(animate %% 1 != 0)) {
-    stop("`animate` must be a vector of whole layer numbers, e.g. c(3, 4, 5).", call. = FALSE)
+  if (!is.numeric(animate) || anyNA(animate) || any(animate %% 1 != 0) || any(animate == 0)) {
+    stop("`animate` must be a vector of whole layer numbers, e.g. c(3, 4, 5) or c(3, 4, -3).",
+         call. = FALSE)
   }
   animate <- as.integer(animate)
-  if (any(animate < 1L | animate > n_layers)) {
+  if (any(abs(animate) > n_layers)) {
     stop(sprintf("`animate` must only contain layer numbers between 1 and %d (the plot has %d layers).",
                  n_layers, n_layers), call. = FALSE)
   }
-  if (anyDuplicated(animate)) stop("`animate` contains duplicate layer numbers.", call. = FALSE)
-  if (is.unsorted(animate)) {
+  starts <- animate[animate > 0]
+  if (length(starts) == 0) stop("`animate` needs at least one positive layer number.", call. = FALSE)
+  if (anyDuplicated(starts)) stop("`animate` contains duplicate layer numbers.", call. = FALSE)
+  if (anyDuplicated(animate[animate < 0])) stop("Each step can only be removed once.", call. = FALSE)
+  if (is.unsorted(starts)) {
+    if (any(animate < 0)) stop("The positive numbers in `animate` must be in increasing order.", call. = FALSE)
     warning("`animate` was not in increasing order and has been sorted.", call. = FALSE)
     animate <- sort(animate)
+    starts <- animate
   }
-  ends <- c(animate[-1] - 1L, n_layers)
+  ends <- c(starts[-1] - 1L, n_layers)
+  steps <- Map(seq.int, starts, ends)
+
+  action <- character(length(animate))
+  step <- integer(length(animate))
+  shown <- logical(length(starts))
+  for (i in seq_along(animate)) {
+    k <- animate[i]
+    if (k > 0) {
+      action[i] <- "in"; step[i] <- match(k, starts); shown[step[i]] <- TRUE
+    } else {
+      j <- match(-k, starts)
+      if (is.na(j)) {
+        stop(sprintf(paste0("`animate` contains %d, but no step starts at layer %d. ",
+                            "Only animated steps can be removed; use the number that starts the step."),
+                     k, -k), call. = FALSE)
+      }
+      if (!shown[j]) stop(sprintf("`animate` removes layer %d (%d) before it has appeared.", -k, k), call. = FALSE)
+      action[i] <- "out"; step[i] <- j; shown[j] <- FALSE
+    }
+  }
   list(
-    static = seq_len(animate[1] - 1L),
-    steps = Map(seq.int, animate, ends)
+    static = seq_len(starts[1] - 1L),
+    steps = steps,
+    sequence = data.frame(action = action, step = step, stringsAsFactors = FALSE)
   )
+}
+
+# Layers shown after each entry of the sequence (first element: start).
+shown_after_each <- function(st) {
+  shown <- st$static
+  out <- list(shown)
+  for (i in seq_len(nrow(st$sequence))) {
+    l <- st$steps[[st$sequence$step[i]]]
+    shown <- if (st$sequence$action[i] == "in") c(shown, l) else setdiff(shown, l)
+    out[[i + 1]] <- shown
+  }
+  out
 }
 
 # Build the gtable and check that every panel has the expected structure.
@@ -109,6 +155,12 @@ layer_label <- function(layer) {
   lbl <- sub("^Geom", "", class(layer$geom)[1])
   lbl <- gsub("([a-z0-9])([A-Z])", "\\1_\\2", lbl)
   paste0("geom_", tolower(lbl))
+}
+
+# One label per entry of the animation sequence ("- " marks a removal).
+seq_labels <- function(p, st) {
+  lbl <- step_labels(p, st$steps)[st$sequence$step]
+  ifelse(st$sequence$action == "out", paste("remove", lbl), lbl)
 }
 
 step_labels <- function(p, steps) {

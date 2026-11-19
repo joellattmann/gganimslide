@@ -35,6 +35,8 @@ ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_fr
 
 `animate = NULL` (default) reveals every layer on its own.
 
+**Removing a step again:** a negative number makes the step that started at that layer disappear, e.g. `animate = c(3, 4, 5, -3)` shows 3, 4, 5+ and then removes layer 3 again. In PowerPoint the `effect` for that entry is used as the exit animation (`"fade"` fades it out, `"wipe_left"` wipes it away); in beamer the layer is simply gone on the next overlay. `effect`, `trigger` and `duration` count removals as steps too.
+
 ## Functions
 
 | function | what it's for |

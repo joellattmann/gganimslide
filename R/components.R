@@ -133,15 +133,12 @@ component_frames <- function(comp, animate, scope) {
   always <- if (scope == "all_but_theme") which(is_theme) else integer(0)
   st <- animation_steps(length(counted), animate)
 
-  shown <- c(always, counted[st$static])
-  frames <- list(build_plot(comp, shown))
-  for (s in st$steps) {
-    shown <- c(shown, counted[s])
-    frames[[length(frames) + 1]] <- build_plot(comp, shown)
-  }
-  labels <- vapply(st$steps, function(s) {
+  frames <- lapply(shown_after_each(st), function(l) build_plot(comp, c(always, counted[l])))
+  step_lbl <- vapply(st$steps, function(s) {
     paste(sprintf("%d %s", s, comp$labels[counted[s]]), collapse = " + ")
   }, character(1))
+  labels <- step_lbl[st$sequence$step]
+  labels <- ifelse(st$sequence$action == "out", paste("remove", labels), labels)
   static_label <- if (length(st$static)) paste("static", paste(st$static, collapse = ",")) else "base"
   list(frames = frames, labels = labels, static_label = static_label)
 }

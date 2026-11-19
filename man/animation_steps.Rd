@@ -12,16 +12,23 @@ animation_steps(n_layers, animate = NULL)
 \item{animate}{`NULL` (every layer is its own step) or an integer vector.}
 }
 \value{
-A list with `static` (integer vector of layers always shown) and
-  `steps` (list of integer vectors, one per step).
+A list with `static` (layers always shown), `steps` (list of layer
+  vectors, one per step that appears) and `sequence` (data frame with one
+  row per entry: `action` `"in"` or `"out"`, and the `step` it refers to).
 }
 \description{
-`animate` lists the layers at which a new step starts. Layers before the
-first entry are static. Each step shows its layer and every following layer
-up to the next entry; the last step shows its layer and all layers after it.
+Positive numbers in `animate` are the layers at which a new step starts.
+Layers before the first positive number are static. Each step shows its
+layer and every following layer up to the next positive number; the last
+one also shows all layers after it. A negative number `-k` removes the step
+that started at layer `k` again (it fades out, or disappears). The entries
+are played in the order given.
 }
 \examples{
 # Six layers, animate = c(3, 4, 5):
 # layers 1-2 static, then 3, then 4, then 5 and 6 together
 animation_steps(6, c(3, 4, 5))
+
+# ... and then layer 3 disappears again
+animation_steps(6, c(3, 4, 5, -3))
 }

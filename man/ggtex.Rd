@@ -28,7 +28,11 @@ ggtex(
 \item{animate}{Layers at which a new step starts. Layers before the first
 entry are always shown; the last entry also reveals all later layers.
 `animate = c(3, 4, 5)` shows layers 1-2, then adds 3, then 4, then 5 and
-everything after it. `NULL` (default) reveals every layer on its own.}
+everything after it. `NULL` (default) reveals every layer on its own.
+A negative number removes a step again: `-3` makes the step that started
+at layer 3 disappear (with the given `effect` as exit animation in
+PowerPoint), e.g. `animate = c(3, 4, 5, -3)`. Entries play in the order
+given, and `effect`, `trigger` and `duration` count removals as steps.}
 
 \item{scope}{What the numbers in `animate` count. `"layers"` (default):
 only geoms, stats and annotations; axes, titles, legend and theme are

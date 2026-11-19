@@ -77,3 +77,28 @@ test_that("scope = 'all' errors helpfully without a recorded history", {
                               f, animate = 2, scope = "all"))
   expect_true(file.exists(f))
 })
+
+test_that("negative numbers remove steps again", {
+  st <- animation_steps(6, c(3, 4, 5, -3))
+  expect_equal(st$steps, list(3L, 4L, 5:6))
+  expect_equal(st$sequence$action, c("in", "in", "in", "out"))
+  expect_equal(st$sequence$step, c(1L, 2L, 3L, 1L))
+  expect_equal(shown_after_each(st)[[5]], c(1:2, 4L, 5:6))
+  expect_error(animation_steps(6, c(3, -4)), "no step starts")
+  expect_error(animation_steps(6, c(-3, 3)), "before it has appeared")
+  expect_error(animation_steps(6, c(1, 2, -1, 1)), "duplicate")
+})
+
+test_that("ggppt writes exit animations; ggtex drops the layer", {
+  f <- tempfile(fileext = ".pptx")
+  ggppt(p6, f, animate = c(3, 4, -3), effect = c("fade", "fade", "fade"))
+  d <- tempfile(); utils::unzip(f, exdir = d)
+  x <- paste(readLines(file.path(d, "ppt/slides/slide1.xml"), warn = FALSE), collapse = "")
+  expect_match(x, 'presetClass="exit"')
+  expect_match(x, 'transition="out"')
+  expect_match(x, 'val="hidden"')
+  pdf <- tempfile(fileext = ".pdf")
+  out <- capture.output(code <- ggtex(p6, pdf, animate = c(3, 4, -3)))
+  expect_match(code, "page=4")
+  expect_false(grepl("page=5", code))
+})

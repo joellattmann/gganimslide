@@ -20,19 +20,26 @@ effect_names <- c("appear", "fade", "wipe_left", "wipe_right", "wipe_up", "wipe_
 trigger_names <- c("click", "with", "after")
 
 # One effect as an XML string; cTn ids are placeholders ("ID") renumbered later.
-effect_xml <- function(spid, effect, node_type, dur_ms) {
+# Entrance: make visible, then run the filter "in". Exit: run the filter
+# "out", then hide the shape when it has finished.
+effect_xml <- function(spid, effect, node_type, dur_ms, exit = FALSE) {
   s <- effect_spec(effect)
+  has_filter <- !is.na(s$filter)
+  set_delay <- if (exit && has_filter) max(dur_ms - 1L, 0L) else 0L
   set <- sprintf(paste0(
-    '<p:set><p:cBhvr><p:cTn id="ID" dur="1" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn>',
+    '<p:set><p:cBhvr><p:cTn id="ID" dur="1" fill="hold"><p:stCondLst><p:cond delay="%d"/></p:stCondLst></p:cTn>',
     '<p:tgtEl><p:spTgt spid="%s"/></p:tgtEl><p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>',
-    '</p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>'), spid)
-  anim <- if (is.na(s$filter)) "" else sprintf(paste0(
-    '<p:animEffect transition="in" filter="%s"><p:cBhvr><p:cTn id="ID" dur="%d"/>',
-    '<p:tgtEl><p:spTgt spid="%s"/></p:tgtEl></p:cBhvr></p:animEffect>'), s$filter, dur_ms, spid)
+    '</p:cBhvr><p:to><p:strVal val="%s"/></p:to></p:set>'),
+    set_delay, spid, if (exit) "hidden" else "visible")
+  anim <- if (!has_filter) "" else sprintf(paste0(
+    '<p:animEffect transition="%s" filter="%s"><p:cBhvr><p:cTn id="ID" dur="%d"/>',
+    '<p:tgtEl><p:spTgt spid="%s"/></p:tgtEl></p:cBhvr></p:animEffect>'),
+    if (exit) "out" else "in", s$filter, dur_ms, spid)
+  body <- if (exit) paste0(anim, set) else paste0(set, anim)
   sprintf(paste0(
-    '<p:par><p:cTn id="ID" presetID="%d" presetClass="entr" presetSubtype="%d" fill="hold" nodeType="%s">',
-    '<p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>%s%s</p:childTnLst></p:cTn></p:par>'),
-    s$preset, s$subtype, node_type, set, anim)
+    '<p:par><p:cTn id="ID" presetID="%d" presetClass="%s" presetSubtype="%d" fill="hold" nodeType="%s">',
+    '<p:stCondLst><p:cond delay="0"/></p:stCondLst><p:childTnLst>%s</p:childTnLst></p:cTn></p:par>'),
+    s$preset, if (exit) "exit" else "entr", s$subtype, node_type, body)
 }
 
 # Existing animation sequence on a slide, as a list of click groups. Each group
@@ -57,13 +64,13 @@ read_sequence <- function(sld) {
 }
 
 # Add animations for shapes `spids` to the slide's main sequence.
-append_animations <- function(sld, spids, effect, trigger, dur_ms) {
+append_animations <- function(sld, spids, effect, trigger, dur_ms, exit = rep(FALSE, length(spids))) {
   groups <- read_sequence(sld)
   for (k in seq_along(spids)) {
     trg <- trigger[k]
     if (trg != "click" && length(groups) == 0) trg <- "click"
     node_type <- switch(trg, click = "clickEffect", with = "withEffect", after = "afterEffect")
-    eff <- effect_xml(spids[k], effect[k], node_type, dur_ms[k])
+    eff <- effect_xml(spids[k], effect[k], node_type, dur_ms[k], exit = exit[k])
     end_dur <- if (effect[k] == "appear") 1 else dur_ms[k]
     if (trg == "click") {
       groups[[length(groups) + 1]] <- list(list(delay = 0, end = end_dur, effects = eff))

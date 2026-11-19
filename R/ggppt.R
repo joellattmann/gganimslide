@@ -13,6 +13,10 @@
 #'   entry are always shown; the last entry also reveals all later layers.
 #'   `animate = c(3, 4, 5)` shows layers 1-2, then adds 3, then 4, then 5 and
 #'   everything after it. `NULL` (default) reveals every layer on its own.
+#'   A negative number removes a step again: `-3` makes the step that started
+#'   at layer 3 disappear (with the given `effect` as exit animation in
+#'   PowerPoint), e.g. `animate = c(3, 4, 5, -3)`. Entries play in the order
+#'   given, and `effect`, `trigger` and `duration` count removals as steps.
 #' @param scope What the numbers in `animate` count: `"layers"` (default),
 #'   `"all"` or `"all_but_theme"`. See [ggtex()] for details. With `"all"` and
 #'   `"all_but_theme"` each step is a full redraw of the plot (on a `bg`
@@ -74,14 +78,16 @@ ggppt <- function(p, file = NULL, animate = NULL,
   if (scope == "layers") {
     gt <- plot_gtable(p)
     st <- animation_steps(gt$n_layers, animate)
-    n <- length(st$steps)
+    n <- nrow(st$sequence)
     frames <- c(list(unclip_panel_border(frame_with_layers(gt, st$static), gt$n_layers)),
                 lapply(st$steps, function(l) overlay_with_layers(gt, l)))
     base_label <- if (length(st$static)) {
       paste0("plot base (layers ", paste(st$static, collapse = ", "), ")")
     } else "plot base"
-    labels <- c(base_label, sprintf("step %d: layer %s", seq_len(n), step_labels(p, st$steps)))
-    bgs <- rep("transparent", n + 1)
+    labels <- c(base_label, sprintf("step %d: layer %s", seq_along(st$steps), step_labels(p, st$steps)))
+    bgs <- rep("transparent", length(frames))
+    targets <- st$sequence$step + 1L        # shape index (1 = base)
+    exits <- st$sequence$action == "out"
   } else {
     cf <- component_frames(comp, animate, scope)
     n <- length(cf$labels)
@@ -90,6 +96,8 @@ ggppt <- function(p, file = NULL, animate = NULL,
     })
     labels <- c(paste("plot", cf$static_label), sprintf("step %d: %s", seq_len(n), cf$labels))
     bgs <- rep(bg, n + 1)
+    targets <- seq_len(n) + 1L
+    exits <- rep(FALSE, n)                  # full redraws: a removal is a new frame
   }
   effect <- check_choice(rep_len(effect, n), effect_names, "effect")
   trigger <- check_choice(rep_len(trigger, n), trigger_names, "trigger")
@@ -121,7 +129,7 @@ ggppt <- function(p, file = NULL, animate = NULL,
   }
 
   sld <- xml2::xml_root(current_slide_xml(doc))
-  append_animations(sld, spids[-1], effect, trigger, as.integer(round(duration * 1000)))
+  append_animations(sld, spids[targets], effect, trigger, as.integer(round(duration * 1000)), exit = exits)
 
   if (is.null(file)) return(doc)
   print(doc, target = file)
