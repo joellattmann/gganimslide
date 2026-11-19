@@ -24,14 +24,14 @@ ggppt(p, "plot.pptx", animate = c(3, 4, 5), title = "My plot")
 ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_frame.tex")
 ```
 
-`animate` lists the layers at which a new step starts:
+`animate` lists the layers at which a new step starts. Everything before the first number is shown from the start, and the last number also brings everything after it. For the plot above, `animate = c(3, 4, 5)` gives:
 
-| overlay / click | shown |
-|---|---|
-| start | axes, legend, layers 1–2 |
-| 1 | + layer 3 |
-| 2 | + layer 4 |
-| 3 | + layer 5 **and everything after it** (6) |
+| PowerPoint | beamer | shown |
+|---|---|---|
+| slide opens | overlay 1 | axes, legend, layers 1–2 |
+| click 1 | overlay 2 | + layer 3 |
+| click 2 | overlay 3 | + layer 4 |
+| click 3 | overlay 4 | + layer 5 **and everything after it** (here: 6) |
 
 `animate = NULL` (default) reveals every layer on its own.
 
