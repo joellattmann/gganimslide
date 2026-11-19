@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use gganimslide, please cite it as below."
+type: software
+title: "gganimslide: Reveal ggplot2 Layers Step by Step in PowerPoint and Beamer Slides"
+version: 0.1.0
+date-released: 2026-11-19
+license: MIT
+repository-code: "https://github.com/joellattmann/gganimslide"
+authors:
+  - family-names: Lattmann
+    given-names: "Joël Frédéric"
+    email: jlattmann@student.ethz.ch
+keywords:
+  - R
+  - ggplot2
+  - PowerPoint
+  - beamer
+  - animation
+  - data visualization

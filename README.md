@@ -1,4 +1,13 @@
-# gganimslide
+# gganimslide <img src="man/figures/logo.png" align="right" height="139" alt="" />
+
+<!-- badges: start -->
+[![Status: beta](https://img.shields.io/badge/status-beta-F2FF00.svg)](https://github.com/joellattmann/gganimslide)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![GitHub release](https://img.shields.io/github/v/release/joellattmann/gganimslide?color=002FA7)](https://github.com/joellattmann/gganimslide/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-002FA7.svg)](LICENSE)
+<!-- badges: end -->
+
+> **Beta:** gganimslide works, but it is new. Function names and arguments may still change. Found a bug or have an idea? [Open an issue](https://github.com/joellattmann/gganimslide/issues).
 
 Reveal the layers of a saved ggplot step by step, in **PowerPoint** or **LaTeX beamer**.
 
@@ -111,3 +120,13 @@ print(doc, target = "talk.pptx")
 
 * Supports standard ggplot2 panels (any geom, `facet_wrap`/`facet_grid`, `coord_cartesian`/`coord_flip`). Exotic extensions that change the panel structure give a clear error.
 * The legend belongs to the static part, so it is visible from the start.
+
+## Citation
+
+If you use gganimslide in your work, please cite it:
+
+```r
+citation("gganimslide")
+```
+
+> Lattmann, J. F. (2026). *gganimslide: Reveal ggplot2 Layers Step by Step in PowerPoint and Beamer Slides*. R package version 0.1.0. https://github.com/joellattmann/gganimslide

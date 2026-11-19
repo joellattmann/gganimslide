@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title   = "{gganimslide}: Reveal {ggplot2} Layers Step by Step in {PowerPoint} and {Beamer} Slides",
+  author  = person("Joël Frédéric", "Lattmann"),
+  year    = "2026",
+  note    = "R package version 0.1.0",
+  url     = "https://github.com/joellattmann/gganimslide"
+)

@@ -3,3 +3,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^Rplots\.pdf$
+^data-raw$
+^CITATION\.cff$
