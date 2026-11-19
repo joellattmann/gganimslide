@@ -9,9 +9,7 @@
 
 Reveal the layers of a saved ggplot step by step, in **PowerPoint** or **LaTeX beamer**.
 
-> **Beta:** gganimslide works, but it is new. Function names and arguments may still change. Found a bug or have an idea? [Open an issue](https://github.com/joellattmann/gganimslide/issues).
->
->
+The following code creates a PowerPoint presentation in your working directory that animates the layers (e.g., geoms) of a `ggplot2` object (*p*). Positive numbers in `animate` mark the layer at which a step *animates in* (each step runs up to the next number); negative numbers *animate out* the step that started at that layer. Except for the plot and the file name, all arguments can be left blank, using the defaults: every layer of the plot *appears* on *click*, while axes, titles and legend are shown from the start.
 ```r
 ggppt(p, "savings.pptx",
       animate  = c(1, 2, 3, 5, 6, 8, -8),
@@ -51,7 +49,7 @@ ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_fr
 
 `animate = NULL` (default) reveals every layer on its own.
 
-**Removing a step again:** a negative number makes the step that started at that layer disappear, e.g. `animate = c(3, 4, 5, -3)` shows 3, 4, 5+ and then removes layer 3 again. In PowerPoint the `effect` for that entry is used as the exit animation (`"fade"` fades it out, `"wipe_left"` wipes it away); in beamer the layer is simply gone on the next overlay. `effect`, `trigger` and `duration` count removals as steps too.
+**Removing a step again:** a negative number makes the step that started at that layer disappear, e.g., `animate = c(3, 4, 5, -3)` shows 3, 4, 5+ and then removes layer 3 again. In PowerPoint the `effect` for that entry is used as the exit animation (`"fade"` fades it out, `"wipe_left"` wipes it away); in beamer the layer is simply gone on the next overlay. `effect`, `trigger` and `duration` count removals as steps too.
 
 ## Functions
 
@@ -61,7 +59,7 @@ ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_fr
 | `ggtex()` | animated beamer slide (multi-page PDF + LaTeX code) |
 | `ppt_deck()` | new 16:9 deck to collect several plots with `ggppt(doc = ...)` |
 | `plot_components()` | shows which number each part of a plot has under each `scope` |
-| `animation_steps()` | previews how an `animate` vector is split into steps, e.g. `animation_steps(6, c(3, 4, 5))` |
+| `animation_steps()` | previews how an `animate` vector is split into steps, e.g., `animation_steps(6, c(3, 4, 5))` |
 | `steps()` | fallback: stores the component order for plots made without gganimslide loaded |
 
 ## Install
@@ -103,7 +101,7 @@ In these modes each step is a full redraw (titles or themes can change the layou
 ## ggppt(): PowerPoint
 
 * The plot becomes a stack of **editable vector shapes** at the same position: one base shape (axes, grid, legend, titles, static layers) plus one transparent shape per step.
-* **Native PowerPoint animations** are written into the slide, so there is nothing to set up by hand. The shapes are named in the Selection Pane (e.g. `step 2: layer 4 geom_smooth`), and you can still change the effects in PowerPoint's Animation Pane.
+* **Native PowerPoint animations** are written into the slide, so there is nothing to set up by hand. The shapes are named in the Selection Pane (e.g., `step 2: layer 4 geom_smooth`), and you can still change the effects in PowerPoint's Animation Pane.
 * `effect`: `"appear"` (default), `"fade"`, `"wipe_left"`, `"wipe_right"`, `"wipe_up"`, `"wipe_down"`. Give one value, or one per step.
 * `size`: `"16:9"` (default) or `"4:3"` for new decks; a `template` keeps its own size.
 * `width`, `height`, `left`, `top`: size and position of the plot in inches (default: the area below the title; the plot is centred unless `left`/`top` are given). **Set the size here, not by dragging in PowerPoint:** dragging doesn't scale the text, and resizing a single step's shape misaligns it with the others.
