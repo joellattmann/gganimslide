@@ -1,0 +1,25 @@
+Package: gganimslide
+Type: Package
+Title: Reveal 'ggplot2' Layers Step by Step in 'PowerPoint' and
+        'Beamer' Slides
+Version: 0.1.0
+Authors@R: person("Joël Frédéric", "Lattmann", role = c("aut", "cre"),
+    email = "jlattmann@student.ethz.ch")
+Description: Turns a saved 'ggplot2' object into an animated slide in which
+    plot layers appear one after another. ggppt() writes a 'PowerPoint' slide
+    with one editable vector shape per step and native entrance animations;
+    ggtex() writes a multi-page PDF plus 'LaTeX' 'beamer' overlay code. All
+    steps are cut from one rendered plot, so axes and layers never shift
+    between steps.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1)
+Imports: ggplot2 (>= 3.4.0), grDevices, grid, officer (>= 0.6.2), rvg
+        (>= 0.3.0), xml2
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
+RoxygenNote: 7.3.1
+NeedsCompilation: no
+Packaged: 2026-11-19 13:31:22 UTC; root
+Author: Joël Frédéric Lattmann [aut, cre]
+Maintainer: Joël Frédéric Lattmann <jlattmann@student.ethz.ch>
