@@ -7,9 +7,25 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-002FA7.svg)](LICENSE)
 <!-- badges: end -->
 
-> **Beta:** gganimslide works, but it is new. Function names and arguments may still change. Found a bug or have an idea? [Open an issue](https://github.com/joellattmann/gganimslide/issues).
-
 Reveal the layers of a saved ggplot step by step, in **PowerPoint** or **LaTeX beamer**.
+
+> **Beta:** gganimslide works, but it is new. Function names and arguments may still change. Found a bug or have an idea? [Open an issue](https://github.com/joellattmann/gganimslide/issues).
+>
+>
+```r
+ggppt(p, "savings.pptx",
+      animate  = c(1, 2, 3, 5, 6, 8, -8),
+      effect   = c("wipe_up", "wipe_left", "fade", "wipe_left", "fade", "fade", "fade"),
+      trigger  = c("click", "click", "after", "click", "after", "click", "click"),
+      duration = c(1, 2.5, 0.5, 2.5, 0.5, 0.6, 0.6))
+```
+
+
+
+https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129
+
+
+
 
 ```r
 p <- ggplot(df, aes(x, y)) +
