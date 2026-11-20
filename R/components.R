@@ -3,20 +3,17 @@
 
 # a finished ggplot does not remember the order in which labs(), scales, 
 # coords, facets and themes were added, so the order comes from (1) plot 
-# code written directly into ggppt()/ggtex(), (2) the history recorded 
-# automatically while gganimslide is loaded (see zzz.R), or (3) steps()
+# code written directly into ggppt()/ggtex(), or (2) steps()
 
 #' Remember the order of a plot's components
-#'
-#' Usually not needed: while gganimslide is loaded, every plot you create
-#' remembers the order of its components automatically. Use `steps()` for
-#' plots made without gganimslide loaded (e.g. in a script that only saves
-#' them with `saveRDS()`), or with `options(gganimslide.record = FALSE)`.
 #'
 #' Wrap the code that makes a plot in `steps()` to store the order of its `+`
 #' components inside the plot. The result is a normal ggplot (you can print,
 #' save and `readRDS()` it), and [ggppt()] / [ggtex()] can later reveal any of
 #' its components with `scope = "all"` or `scope = "all_but_theme"`.
+#'
+#' Only needed for these two scopes. With the default `scope = "layers"`,
+#' any saved ggplot works without `steps()`.
 #'
 #' @param plot The code that makes the plot, e.g.
 #'   `ggplot(df, aes(x, y)) + geom_point() + labs(title = "A")`.
@@ -25,10 +22,10 @@
 #' library(ggplot2)
 #' p <- steps(
 #'   ggplot(mtcars, aes(wt, mpg)) +
-#'     geom_point() +                 # 1
-#'     labs(title = "Fuel use") +     # 2
-#'     theme_minimal() +              # 3
-#'     geom_smooth(method = "lm")     # 4
+#'     geom_point() +                                  # 1
+#'     labs(title = "Fuel use") +                      # 2
+#'     theme_minimal() +                               # 3
+#'     geom_smooth(method = "lm", formula = y ~ x)     # 4
 #' )
 #' plot_components(p)
 #' @export
@@ -108,10 +105,9 @@ resolve_components <- function(expr, env, p, required = FALSE) {
   }
   if (required) {
     stop(paste0(
-      "This plot does not know the order of its components, probably because it was ",
-      "made before library(gganimslide) was loaded. Re-run the plot code with ",
-      "gganimslide loaded, wrap it in steps(), or write the plot code directly ",
-      "into the call."), call. = FALSE)
+      "This plot does not know the order of its components. Make it with steps(), ",
+      "e.g. p <- steps(ggplot(df, aes(x, y)) + geom_point() + ...), or write the ",
+      "plot code directly into the call."), call. = FALSE)
   }
   NULL
 }

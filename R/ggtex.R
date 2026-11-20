@@ -2,11 +2,12 @@
 #'
 #' Writes a multi-page PDF in which page 1 shows the static layers (and axes,
 #' legend, titles) and page *k + 1* adds the first *k* animation steps, and returns the beamer code that shows one page
-#' per overlay (`\\only<k>{...}`). Every page is cut from the same rendered plot,
+#' per overlay (with beamer's `\\only` command). Every page is cut from the same rendered plot,
 #' so nothing moves between steps.
 #'
 #' @param p A saved ggplot object.
 #' @param file Path of the PDF to write (e.g. `"figures/turnout.pdf"`).
+#'   Required.
 #' @param animate Layers at which a new step starts. Layers before the first
 #'   entry are always shown; the last entry also reveals all later layers.
 #'   `animate = c(3, 4, 5)` shows layers 1-2, then adds 3, then 4, then 5 and
@@ -20,9 +21,8 @@
 #'   always shown. `"all"`: every `+` component of the plot in the order it was
 #'   written (geoms, `labs()`, scales, coords, facets, `theme_*()`, `theme()`).
 #'   `"all_but_theme"`: like `"all"`, but `theme()` and `theme_*()` calls are
-#'   not counted and always applied. For these two, the plot must have been
-#'   created while gganimslide was loaded (its components are then recorded
-#'   automatically), or made with [steps()], or written directly into the call.
+#'   not counted and always applied. For these two, the plot must be made
+#'   with [steps()], or its code written directly into the call.
 #' @param categorical If `TRUE`, every group within a step (each bar, box,
 #'   colour group, ...) gets its own overlay, in group order. See [ggppt()].
 #' @param width,height Size of the PDF in inches. Use the size the plot will
@@ -39,7 +39,8 @@
 #'   the plot.
 #' @param device PDF device; `grDevices::cairo_pdf` (if available) handles
 #'   Unicode and system fonts, `grDevices::pdf` is the fallback.
-#' @return The LaTeX code (invisibly); it is also printed.
+#' @param verbose If `TRUE` (default), the LaTeX code is printed to the console.
+#' @return The LaTeX code (invisibly); it is also printed if `verbose = TRUE`.
 #' @examples
 #' library(ggplot2)
 #' p <- ggplot(mtcars, aes(wt, mpg)) +
@@ -49,11 +50,12 @@
 #' out <- tempfile(fileext = ".pdf")
 #' ggtex(p, out, animate = c(2, 3), title = "Fuel use")
 #' @export
-ggtex <- function(p, file = "plot.pdf", animate = NULL,
+ggtex <- function(p, file, animate = NULL,
                   scope = c("layers", "all", "all_but_theme"), width = 5.5, height = 3,
                   title = NULL, tex = NULL, standalone = FALSE,
                   graphics_path = NULL, include_width = "\\linewidth",
-                  start = 1, device = NULL, categorical = FALSE) {
+                  start = 1, device = NULL, categorical = FALSE, verbose = TRUE) {
+  if (missing(file)) stop("Give the `file` to write, e.g. ggtex(p, \"figures/plot.pdf\").", call. = FALSE)
   scope <- match.arg(scope)
   if (isTRUE(categorical) && scope != "layers") {
     stop("`categorical = TRUE` only works with scope = \"layers\".", call. = FALSE)
@@ -137,7 +139,7 @@ ggtex <- function(p, file = "plot.pdf", animate = NULL,
     dir.create(dirname(tex), showWarnings = FALSE, recursive = TRUE)
     writeLines(code, tex)
   }
-  cat(code, "\n")
+  if (verbose) cat(code, "\n")
   invisible(code)
 }
 

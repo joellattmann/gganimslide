@@ -9,6 +9,12 @@
 
 Reveal the layers of a saved ggplot step by step, in **PowerPoint** or **LaTeX beamer**.
 
+<!-- Install from CRAN:
+```r
+install.packages("gganimslide")
+```
+
+Or get the development version: -->
 ```r
 # install.packages("remotes")
 remotes::install_github("joellattmann/gganimslide")
@@ -80,7 +86,7 @@ ggppt(bars, "bars.pptx", categorical = TRUE, effect = "fade") # one bar per clic
 | `ppt_deck()` | new 16:9 deck to collect several plots with `ggppt(doc = ...)` |
 | `plot_components()` | shows which number each part of a plot has under each `scope` |
 | `animation_steps()` | previews how an `animate` vector is split into steps, e.g., `animation_steps(6, c(3, 4, 5))` |
-| `steps()` | fallback: stores the component order for plots made without gganimslide loaded |
+| `steps()` | stores the component order of a saved plot, needed for `scope = "all"` / `"all_but_theme"` |
 
 ## scope: what the numbers count
 
@@ -92,23 +98,30 @@ By default (`scope = "layers"`) the numbers only count geoms, stats and `annotat
 | `"all"` | every `+` component in the order written: geoms, `labs()`, scales, coords, facets, `theme_*()`, `theme()` |
 | `"all_but_theme"` | the same, but `theme()` / `theme_*()` are not counted and always applied |
 
-A finished ggplot normally forgets the order of its components, so while gganimslide is loaded it **records them automatically** for every plot you create. Nothing to wrap, and the order survives `saveRDS()` / `readRDS()`:
+A finished ggplot forgets the order in which its components were added, so for `"all"` and `"all_but_theme"` the package needs that order. Either wrap the plot code in `steps()` when you make the plot (the order is stored in the object and survives `saveRDS()` / `readRDS()`):
 
 ```r
-library(gganimslide)
-
-p <- ggplot(mtcars, aes(wt, mpg)) +
-  geom_point() +                    # 1
-  labs(title = "Fuel use") +        # 2
-  theme_minimal() +                 # 3
-  geom_smooth(method = "lm")        # 4
+p <- steps(
+  ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +                    # 1
+    labs(title = "Fuel use") +        # 2
+    theme_minimal() +                 # 3
+    geom_smooth(method = "lm")        # 4
+)
 
 plot_components(p) # shows the numbering for each scope
 
 ggppt(p, "fuel.pptx", animate = c(2, 3, 4), scope = "all")
 ```
 
-Only plots created *before* `library(gganimslide)` (or with `options(gganimslide.record = FALSE)`) have no recorded order. For those, re-run the plot code, wrap it in `steps(...)`, or write the code directly into the `ggppt()`/`ggtex()` call.
+or write the plot code directly into the call:
+
+```r
+ggppt(ggplot(mtcars, aes(wt, mpg)) + geom_point() + labs(title = "Fuel use"),
+      "fuel.pptx", animate = 2, scope = "all")
+```
+
+With the default `scope = "layers"` (and with `categorical = TRUE`) none of this is needed: any saved ggplot works as it is.
 
 In these modes each step is a full redraw (titles or themes can change the layout), so in PowerPoint every step covers the previous one; set `bg` to your slide background if it isn't white.
 
@@ -160,4 +173,4 @@ If you use gganimslide in your work, please cite it:
 citation("gganimslide")
 ```
 
-> Lattmann, J. F. (2026). *gganimslide: Reveal ggplot2 Layers Step by Step in PowerPoint and Beamer Slides*. R package version 0.1.0. https://github.com/joellattmann/gganimslide
+> Lattmann, J. F. (2026). *gganimslide: Reveal ggplot2 Layers Step by Step in PowerPoint and Beamer Slides*. R package version 0.2.0. https://github.com/joellattmann/gganimslide

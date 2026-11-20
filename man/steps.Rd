@@ -14,25 +14,23 @@ steps(plot)
 The plot, with the component order stored as an attribute.
 }
 \description{
-Usually not needed: while gganimslide is loaded, every plot you create
-remembers the order of its components automatically. Use `steps()` for
-plots made without gganimslide loaded (e.g. in a script that only saves
-them with `saveRDS()`), or with `options(gganimslide.record = FALSE)`.
-}
-\details{
 Wrap the code that makes a plot in `steps()` to store the order of its `+`
 components inside the plot. The result is a normal ggplot (you can print,
 save and `readRDS()` it), and [ggppt()] / [ggtex()] can later reveal any of
 its components with `scope = "all"` or `scope = "all_but_theme"`.
 }
+\details{
+Only needed for these two scopes. With the default `scope = "layers"`,
+any saved ggplot works without `steps()`.
+}
 \examples{
 library(ggplot2)
 p <- steps(
   ggplot(mtcars, aes(wt, mpg)) +
-    geom_point() +                 # 1
-    labs(title = "Fuel use") +     # 2
-    theme_minimal() +              # 3
-    geom_smooth(method = "lm")     # 4
+    geom_point() +                                  # 1
+    labs(title = "Fuel use") +                      # 2
+    theme_minimal() +                               # 3
+    geom_smooth(method = "lm", formula = y ~ x)     # 4
 )
 plot_components(p)
 }

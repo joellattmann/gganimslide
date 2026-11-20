@@ -1,8 +1,20 @@
-# gganimslide (development version)
+# gganimslide 0.2.0
+
+## New features
 
 * `categorical = TRUE` in `ggppt()` and `ggtex()`: reveal each group (bar, box, colour group) of a step on its own.
 * Negative numbers in `animate` remove a step again (exit animations in PowerPoint).
-* `ggppt()`: `width`, `height`, `left`, `top` to size and place the plot; panel border drawn unclipped.
+* `ggppt()`: `width`, `height`, `left`, `top` to size and place the plot.
+* `ggtex()`: `verbose = FALSE` stops the LaTeX code from being printed.
+
+## Breaking changes
+
+* Component order is no longer recorded automatically. For `scope = "all"` / `"all_but_theme"`, make the plot with `steps()` or write the plot code directly into the call. The default `scope = "layers"` is unaffected.
+* `ggtex()`: `file` no longer has a default and must be given.
+
+## Bug fixes
+
+* `ggppt()`: the panel border is drawn unclipped, so all four sides show in PowerPoint.
 
 # gganimslide 0.1.0 (beta)
 

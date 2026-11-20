@@ -60,17 +60,17 @@ test_that("steps() stores components; scopes count them correctly", {
   expect_match(cf2$labels[2], "geom_smooth")
 })
 
-test_that("components are recorded automatically and survive saveRDS", {
-  q <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + labs(title = "C") + theme_bw()
+test_that("steps() labels survive saveRDS", {
+  q <- steps(ggplot(mtcars, aes(wt, mpg)) + geom_point() + labs(title = "C") + theme_bw())
   f <- tempfile(fileext = ".rds"); saveRDS(q, f); q <- readRDS(f)
   comp <- attr(q, "gganimslide")
   expect_equal(comp$labels, c("geom_point()", "labs(title = \"C\")", "theme_bw()"))
   expect_length(component_frames(comp, 2, "all")$frames, 2)
 })
 
-test_that("scope = 'all' errors helpfully without a recorded history", {
+test_that("scope = 'all' needs steps() or plot code in the call", {
   q <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
-  attr(q, "gganimslide") <- NULL
+  expect_null(attr(q, "gganimslide"))
   expect_error(ggtex(q, tempfile(fileext = ".pdf"), scope = "all"), "steps\\(\\)")
   f <- tempfile(fileext = ".pdf")
   out <- capture.output(ggtex(ggplot(mtcars, aes(wt, mpg)) + geom_point() + labs(title = "B"),
@@ -121,4 +121,11 @@ test_that("categorical = TRUE splits steps by group", {
   expect_length(plan$sub, 4)
   expect_equal(vapply(plan$seq, function(r) r$action, ""), c("in", "in", "in", "in", "out"))
   expect_error(ggppt(bars, tempfile(fileext = ".pptx"), scope = "all", categorical = TRUE), "only works")
+})
+
+test_that("ggtex needs a file and can be quiet", {
+  expect_error(ggtex(p6), "file")
+  f <- tempfile(fileext = ".pdf")
+  expect_silent(ggtex(p6, f, animate = c(3, 4), verbose = FALSE))
+  expect_true(file.exists(f))
 })
