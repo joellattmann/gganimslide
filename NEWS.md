@@ -1,3 +1,9 @@
+# gganimslide (development version)
+
+* `categorical = TRUE` in `ggppt()` and `ggtex()`: reveal each group (bar, box, colour group) of a step on its own.
+* Negative numbers in `animate` remove a step again (exit animations in PowerPoint).
+* `ggppt()`: `width`, `height`, `left`, `top` to size and place the plot; panel border drawn unclipped.
+
 # gganimslide 0.1.0 (beta)
 
 First public release.

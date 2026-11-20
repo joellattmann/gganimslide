@@ -23,6 +23,8 @@
 #'   not counted and always applied. For these two, the plot must have been
 #'   created while gganimslide was loaded (its components are then recorded
 #'   automatically), or made with [steps()], or written directly into the call.
+#' @param categorical If `TRUE`, every group within a step (each bar, box,
+#'   colour group, ...) gets its own overlay, in group order. See [ggppt()].
 #' @param width,height Size of the PDF in inches. Use the size the plot will
 #'   have on the slide so text sizes match (a full 16:9 beamer frame is about
 #'   5.5 x 3).
@@ -51,12 +53,37 @@ ggtex <- function(p, file = "plot.pdf", animate = NULL,
                   scope = c("layers", "all", "all_but_theme"), width = 5.5, height = 3,
                   title = NULL, tex = NULL, standalone = FALSE,
                   graphics_path = NULL, include_width = "\\linewidth",
-                  start = 1, device = NULL) {
+                  start = 1, device = NULL, categorical = FALSE) {
   scope <- match.arg(scope)
-  if (scope == "layers") {
+  if (isTRUE(categorical) && scope != "layers") {
+    stop("`categorical = TRUE` only works with scope = \"layers\".", call. = FALSE)
+  }
+  if (scope == "layers" && isTRUE(categorical)) {
     gt <- plot_gtable(p)
     st <- animation_steps(gt$n_layers, animate)
-    # Page 1: static part; then one page per entry of the sequence.
+    built <- ggplot2::ggplot_build(p)
+    groups <- layer_groups(built)
+    plan <- categorical_plan(st, groups)
+    static_spec <- stats::setNames(as.list(rep(TRUE, length(st$static))), st$static)
+    full <- function(active) {
+      gtable_from_spec(built, merge_specs(c(list(static_spec),
+                                            lapply(plan$sub[active], sub_spec, groups = groups))))$g
+    }
+    active <- integer(0)
+    pages <- list(full(active))
+    for (row in plan$seq) {
+      active <- if (row$action == "in") c(active, row$subs) else setdiff(active, row$subs)
+      pages[[length(pages) + 1]] <- full(active)
+    }
+    info <- c(if (length(st$static)) paste("static", paste(st$static, collapse = ",")) else "axes",
+              vapply(plan$seq, function(row) {
+                l <- paste(vapply(plan$sub[row$subs], function(sb) sub_label(p, sb), ""), collapse = " + ")
+                if (row$action == "out") paste("remove", l) else l
+              }, ""))
+  } else if (scope == "layers") {
+    gt <- plot_gtable(p)
+    st <- animation_steps(gt$n_layers, animate)
+    # page 1: static part; then one page per entry of the sequence
     pages <- lapply(shown_after_each(st), function(l) frame_with_layers(gt, l))
     info <- c(if (length(st$static)) paste("static", paste(st$static, collapse = ",")) else "axes",
               seq_labels(p, st))

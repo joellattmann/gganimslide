@@ -9,7 +9,6 @@ repository-code: "https://github.com/joellattmann/gganimslide"
 authors:
   - family-names: Lattmann
     given-names: "Joël Frédéric"
-    email: jlattmann@student.ethz.ch
 keywords:
   - R
   - ggplot2

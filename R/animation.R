@@ -1,4 +1,4 @@
-# Writing native PowerPoint entrance animations (<p:timing>) into slide XML.
+# writing native powerpoint entrance animations (<p:timing>) into slide xml
 
 ns_p <- "http://schemas.openxmlformats.org/presentationml/2006/main"
 ns_a <- "http://schemas.openxmlformats.org/drawingml/2006/main"
@@ -19,9 +19,9 @@ effect_spec <- function(effect) {
 effect_names <- c("appear", "fade", "wipe_left", "wipe_right", "wipe_up", "wipe_down")
 trigger_names <- c("click", "with", "after")
 
-# One effect as an XML string; cTn ids are placeholders ("ID") renumbered later.
-# Entrance: make visible, then run the filter "in". Exit: run the filter
-# "out", then hide the shape when it has finished.
+# one effect as an xml string; cTn ids are placeholders ("ID") renumbered later
+# entrance: make visible, then run the filter "in". exit: run the filter
+# "out", then hide the shape when it has finished
 effect_xml <- function(spid, effect, node_type, dur_ms, exit = FALSE) {
   s <- effect_spec(effect)
   has_filter <- !is.na(s$filter)
@@ -42,9 +42,9 @@ effect_xml <- function(spid, effect, node_type, dur_ms, exit = FALSE) {
     s$preset, if (exit) "exit" else "entr", s$subtype, node_type, body)
 }
 
-# Existing animation sequence on a slide, as a list of click groups. Each group
+# existing animation sequence on a slide, as a list of click groups. each group
 # is a list of "sub-steps" (things that start at the same time) with a start
-# delay (ms), an end time (ms) and the effect XML strings.
+# delay (ms), an end time (ms) and the effect xml strings
 read_sequence <- function(sld) {
   ns <- c(p = ns_p)
   groups <- xml2::xml_find_all(sld,
@@ -63,7 +63,7 @@ read_sequence <- function(sld) {
   })
 }
 
-# Add animations for shapes `spids` to the slide's main sequence.
+# add animations for shapes `spids` to the slide's main sequence
 append_animations <- function(sld, spids, effect, trigger, dur_ms, exit = rep(FALSE, length(spids))) {
   groups <- read_sequence(sld)
   for (k in seq_along(spids)) {
@@ -112,8 +112,8 @@ write_timing <- function(sld, groups) {
     '</p:seq></p:childTnLst></p:cTn></p:par></p:tnLst></p:timing>'),
     ns_a, ns_r, ns_p, paste(group_xml, collapse = ""))
 
-  # Strip namespace declarations copied along with old effect nodes, then
-  # number every cTn sequentially (PowerPoint requires unique ids).
+  # strip namespace declarations copied along with old effect nodes, then
+  # number every cTn sequentially (powerpoint requires unique ids)
   txt <- gsub(' xmlns:[a-z]+="[^"]*"', "", txt)
   txt <- sub("<p:timing", sprintf('<p:timing xmlns:a="%s" xmlns:r="%s" xmlns:p="%s"', ns_a, ns_r, ns_p), txt, fixed = TRUE)
   txt <- renumber_ctn(txt)

@@ -1,9 +1,10 @@
-# Step-by-step reveal of *all* `+` components of a plot (scope = "all" or
-# "all_but_theme"). A finished ggplot does not remember the order in which
-# labs(), scales, coords, facets and themes were added, so the order comes
-# from (1) plot code written directly into ggppt()/ggtex(), (2) the history
-# recorded automatically while gganimslide is loaded (see zzz.R), or
-# (3) steps().
+# step-by-step reveal of *all* `+` components of a plot (scope = "all" or
+# "all_but_theme")
+
+# a finished ggplot does not remember the order in which labs(), scales, 
+# coords, facets and themes were added, so the order comes from (1) plot 
+# code written directly into ggppt()/ggtex(), (2) the history recorded 
+# automatically while gganimslide is loaded (see zzz.R), or (3) steps()
 
 #' Remember the order of a plot's components
 #'
@@ -91,7 +92,7 @@ components_from_expr <- function(expr, env) {
   list(base = base, objects = objects, labels = labels)
 }
 
-# Find the components: plot code in the call > steps() attribute > none.
+# find the components: plot code in the call > steps() attribute > none
 resolve_components <- function(expr, env, p, required = FALSE) {
   if (is.call(expr) && identical(expr[[1]], as.name("+"))) {
     return(components_from_expr(expr, env))
@@ -125,8 +126,8 @@ build_plot <- function(comp, which) {
   p
 }
 
-# For scope "all" / "all_but_theme": a list of full plots, one per overlay
-# (first = static part), and a label per step.
+# for scope "all" / "all_but_theme": a list of full plots, one per overlay
+# (first = static part), and a label per step
 component_frames <- function(comp, animate, scope) {
   is_theme <- vapply(comp$objects, is_theme_component, logical(1))
   counted <- if (scope == "all_but_theme") which(!is_theme) else seq_along(comp$objects)

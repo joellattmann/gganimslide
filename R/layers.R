@@ -1,11 +1,11 @@
-# Cutting one rendered ggplot into aligned pieces.
-#
-# The plot is built once with ggplotGrob(). A ggplot panel is a gTree whose
-# children are: coord background (grid), facet background, one grob per
-# layer, facet foreground, coord foreground (panel.border). Every piece below is a copy of the same
-# gtable with some of those children (or the non-panel grobs) replaced by
-# zeroGrob(). The layout (axis widths, legend size, panel area) is fixed when
-# the gtable is built, so all pieces line up exactly when stacked.
+# cutting one rendered ggplot into aligned pieces
+
+# the plot is built once with ggplotGrob(). a ggplot panel is a gTree whose
+# children are: coord background (grid), facet background, one grob per layer, 
+# facet foreground, coord foreground (panel.border). every piece below is a copy 
+# of the same gtable with some of those children (or the non-panel grobs) replaced 
+# by zeroGrob(). the layout (axis widths, legend size, panel area) is fixed when the 
+# gtable is built, so all pieces line up exactly when stacked
 
 #' Work out the animation steps from `animate`
 #'
@@ -79,7 +79,7 @@ animation_steps <- function(n_layers, animate = NULL) {
   )
 }
 
-# Layers shown after each entry of the sequence (first element: start).
+# layers shown after each entry of the sequence (first element: start)
 shown_after_each <- function(st) {
   shown <- st$static
   out <- list(shown)
@@ -91,7 +91,7 @@ shown_after_each <- function(st) {
   out
 }
 
-# Build the gtable and check that every panel has the expected structure.
+# build the gtable and check that every panel has the expected structure
 plot_gtable <- function(p) {
   if (!is_gg(p)) stop("`p` must be a ggplot object.", call. = FALSE)
   n_layers <- length(p$layers)
@@ -115,7 +115,7 @@ plot_gtable <- function(p) {
   list(g = g, panel_idx = panel_idx, n_layers = n_layers, lead = lead)
 }
 
-# Keep only the given layers (and optionally the panel background/foreground).
+# keep only the given layers (and optionally the panel background/foreground)
 filter_panel <- function(panel, layers, n_layers, lead, decor) {
   kids <- panel$children
   for (j in seq_along(kids)) {
@@ -131,7 +131,7 @@ filter_panel <- function(panel, layers, n_layers, lead, decor) {
   grid::setChildren(panel, do.call(grid::gList, unname(as.list(kids))))
 }
 
-# Full plot showing only `layers` (axes, legend, titles included).
+# full plot showing only `layers` (axes, legend, titles included)
 frame_with_layers <- function(gt, layers) {
   g <- gt$g
   for (i in gt$panel_idx) {
@@ -140,7 +140,7 @@ frame_with_layers <- function(gt, layers) {
   g
 }
 
-# Only `layers`, on a transparent background, with everything else blanked.
+# only `layers`, on a transparent background, with everything else blanked
 overlay_with_layers <- function(gt, layers) {
   g <- gt$g
   non_panel <- setdiff(seq_along(g$grobs), gt$panel_idx)
@@ -157,7 +157,7 @@ layer_label <- function(layer) {
   paste0("geom_", tolower(lbl))
 }
 
-# One label per entry of the animation sequence ("- " marks a removal).
+# one label per entry of the animation sequence ("- " marks a removal)
 seq_labels <- function(p, st) {
   lbl <- step_labels(p, st$steps)[st$sequence$step]
   ifelse(st$sequence$action == "out", paste("remove", lbl), lbl)
@@ -169,17 +169,17 @@ step_labels <- function(p, steps) {
   }, "")
 }
 
-# is.ggplot() is deprecated from ggplot2 3.5.2; is_ggplot() is missing before.
+# is.ggplot() is deprecated from ggplot2 3.5.2; is_ggplot() is missing before
 is_gg <- function(x) {
   ns <- asNamespace("ggplot2")
   f <- if (exists("is_ggplot", envir = ns, inherits = FALSE)) get("is_ggplot", envir = ns) else get("is.ggplot", envir = ns)
   isTRUE(f(x))
 }
 
-# Draw the panel foreground (panel.border) outside the panel's clipping
-# region. Some PowerPoint renderers drop border lines that lie exactly on the
+# draw the panel foreground (panel.border) outside the panel's clipping
+# region. some powerpoint renderers drop border lines that lie exactly on the
 # clip boundary; moving the border to its own unclipped gtable cell on top
-# keeps all four sides. Used for the PowerPoint output only.
+# keeps all four sides. used for the powerpoint output only
 unclip_panel_border <- function(g, n_layers) {
   panel_idx <- grep("^panel", g$layout$name)
   z_top <- max(g$layout$z, na.rm = TRUE)

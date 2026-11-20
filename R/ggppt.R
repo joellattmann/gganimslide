@@ -49,6 +49,11 @@
 #'   Defaults to the area below the title.
 #' @param editable If `TRUE`, the shapes and text of the plot can be edited
 #'   in PowerPoint.
+#' @param categorical If `TRUE`, every group within a step (each bar, box,
+#'   colour group, line of a `colour =` mapping, ...) is revealed on its own,
+#'   in group order. The step's `effect`, `trigger` and `duration` apply to
+#'   each group, and a negative number removes all groups of that step at
+#'   once. Only with `scope = "layers"`.
 #' @param ... Further arguments for [rvg::dml()], e.g. `fonts`.
 #' @return If `file` is given, its path (invisibly); otherwise the updated
 #'   `rpptx` object.
@@ -67,15 +72,44 @@ ggppt <- function(p, file = NULL, animate = NULL,
                   effect = "appear", trigger = "click", duration = 0.5,
                   doc = NULL, template = NULL, size = c("16:9", "4:3"),
                   width = NULL, height = NULL, left = NULL, top = NULL, location = NULL,
-                  editable = TRUE, bg = "white", ...) {
+                  editable = TRUE, bg = "white", categorical = FALSE, ...) {
   scope <- match.arg(scope)
+  if (isTRUE(categorical) && scope != "layers") {
+    stop("`categorical = TRUE` only works with scope = \"layers\".", call. = FALSE)
+  }
   size <- match.arg(size)
   comp <- if (scope != "layers") {
     resolve_components(substitute(p), parent.frame(), p, required = TRUE)
   }
   if (is.null(file) && is.null(doc)) stop("Give a `file` to write, or a `doc` to add the slide to.", call. = FALSE)
 
-  if (scope == "layers") {
+  with_prev <- NULL
+  if (scope == "layers" && isTRUE(categorical)) {
+    gt <- plot_gtable(p)
+    st <- animation_steps(gt$n_layers, animate)
+    n <- nrow(st$sequence)
+    built <- ggplot2::ggplot_build(p)
+    groups <- layer_groups(built)
+    plan <- categorical_plan(st, groups)
+    frames <- c(list(unclip_panel_border(frame_with_layers(gt, st$static), gt$n_layers)),
+                lapply(plan$sub, function(sb) {
+                  overlay_with_layers(gtable_from_spec(built, sub_spec(sb, groups)), sb$layers)
+                }))
+    base_label <- if (length(st$static)) {
+      paste0("plot base (layers ", paste(st$static, collapse = ", "), ")")
+    } else "plot base"
+    labels <- c(base_label, sprintf("step %d: layer %s", seq_along(plan$sub),
+                                    vapply(plan$sub, function(sb) sub_label(p, sb), "")))
+    bgs <- rep("transparent", length(frames))
+    # one animation per sub-step shape; exits remove all shapes of a step together
+    targets <- integer(0); exits <- logical(0); entry <- integer(0); with_prev <- logical(0)
+    for (row in plan$seq) {
+      targets <- c(targets, row$subs + 1L)
+      exits <- c(exits, rep(row$action == "out", length(row$subs)))
+      entry <- c(entry, rep(row$entry, length(row$subs)))
+      with_prev <- c(with_prev, row$action == "out" & seq_along(row$subs) > 1)
+    }
+  } else if (scope == "layers") {
     gt <- plot_gtable(p)
     st <- animation_steps(gt$n_layers, animate)
     n <- nrow(st$sequence)
@@ -86,7 +120,7 @@ ggppt <- function(p, file = NULL, animate = NULL,
     } else "plot base"
     labels <- c(base_label, sprintf("step %d: layer %s", seq_along(st$steps), step_labels(p, st$steps)))
     bgs <- rep("transparent", length(frames))
-    targets <- st$sequence$step + 1L        # shape index (1 = base)
+    targets <- st$sequence$step + 1L # shape index (1 = base)
     exits <- st$sequence$action == "out"
   } else {
     cf <- component_frames(comp, animate, scope)
@@ -97,11 +131,16 @@ ggppt <- function(p, file = NULL, animate = NULL,
     labels <- c(paste("plot", cf$static_label), sprintf("step %d: %s", seq_len(n), cf$labels))
     bgs <- rep(bg, n + 1)
     targets <- seq_len(n) + 1L
-    exits <- rep(FALSE, n)                  # full redraws: a removal is a new frame
+    exits <- rep(FALSE, n) # full redraws: a removal is a new frame
   }
   effect <- check_choice(rep_len(effect, n), effect_names, "effect")
   trigger <- check_choice(rep_len(trigger, n), trigger_names, "trigger")
   duration <- rep_len(duration, n)
+  if (!is.null(with_prev)) { # categorical: expand to one value per shape
+    effect <- effect[entry]
+    trigger <- ifelse(with_prev, "with", trigger[entry])
+    duration <- duration[entry]
+  }
 
   if (is.null(doc)) {
     if (is.null(template) && size == "16:9") {
@@ -175,7 +214,7 @@ last_shape_id <- function(doc) {
   ns <- c(p = ns_p)
   sld <- current_slide_xml(doc)
   # officer renumbers every p:cNvPr in document order when it saves the file;
-  # do the same now so the ids written into the animations stay valid.
+  # do the same now so the ids written into the animations stay valid
   cnvpr <- xml2::xml_find_all(sld, "//p:cNvPr", ns)
   for (i in seq_along(cnvpr)) xml2::xml_attr(cnvpr[[i]], "id") <- i
   tree <- xml2::xml_find_first(sld, "//p:cSld/p:spTree", ns)
@@ -210,7 +249,7 @@ ppt_deck <- function(size = c("16:9", "4:3"), template = NULL) {
   officer::read_pptx(template)
 }
 
-# Fit a plot of the given size into the free area (centred unless left/top given).
+# fit a plot of the given size into the free area (centred unless left/top given)
 place_plot <- function(area, width, height, left, top) {
   w <- if (is.null(width)) area$width else width
   h <- if (is.null(height)) area$height else height

@@ -1,11 +1,11 @@
-# Automatic recording of plot components.
-#
-# Every `plot + component` in ggplot2 (3.x and 4.x) goes through the internal
-# function ggplot2:::add_ggplot(p, object, objectname). While gganimslide is
+# automatic recording of plot components.
+
+# every `plot + component` in ggplot2 (3.x and 4.x) goes through the internal
+# function ggplot2:::add_ggplot(p, object, objectname). while gganimslide is
 # loaded, that function is wrapped so each new plot remembers its base plot and
-# the components added to it, in order. That is what scope = "all" and
+# the components added to it, in order. that is what scope = "all" and
 # scope = "all_but_theme" need, so plots no longer have to be wrapped in
-# steps(). Turn it off with options(gganimslide.record = FALSE) before loading.
+# steps(). turn it off with options(gganimslide.record = FALSE) before loading
 
 .recorder <- new.env(parent = emptyenv())
 

@@ -17,7 +17,8 @@ ggtex(
   graphics_path = NULL,
   include_width = "\\\\linewidth",
   start = 1,
-  device = NULL
+  device = NULL,
+  categorical = FALSE
 )
 }
 \arguments{
@@ -64,6 +65,9 @@ the plot.}
 
 \item{device}{PDF device; `grDevices::cairo_pdf` (if available) handles
 Unicode and system fonts, `grDevices::pdf` is the fallback.}
+
+\item{categorical}{If `TRUE`, every group within a step (each bar, box,
+colour group, ...) gets its own overlay, in group order. See [ggppt()].}
 }
 \value{
 The LaTeX code (invisibly); it is also printed.

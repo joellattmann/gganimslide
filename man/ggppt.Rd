@@ -23,6 +23,7 @@ ggppt(
   location = NULL,
   editable = TRUE,
   bg = "white",
+  categorical = FALSE,
   ...
 )
 }
@@ -85,6 +86,12 @@ in PowerPoint.}
 
 \item{bg}{Background of the full redraws used by `"all"` and
 `"all_but_theme"`. Should match the slide background.}
+
+\item{categorical}{If `TRUE`, every group within a step (each bar, box,
+colour group, line of a `colour =` mapping, ...) is revealed on its own,
+in group order. The step's `effect`, `trigger` and `duration` apply to
+each group, and a negative number removes all groups of that step at
+once. Only with `scope = "layers"`.}
 
 \item{...}{Further arguments for [rvg::dml()], e.g. `fonts`.}
 }

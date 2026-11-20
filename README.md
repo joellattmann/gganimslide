@@ -3,7 +3,7 @@
 <!-- badges: start -->
 [![Status: beta](https://img.shields.io/badge/status-beta-F2FF00.svg)](https://github.com/joellattmann/gganimslide)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![GitHub release](https://img.shields.io/github/v/release/joellattmann/gganimslide?color=002FA7)](https://github.com/joellattmann/gganimslide/releases)
+[![GitHub release](https://img.shields.io/github/v/release/joellattmann/gganimslide?include_prereleases&color=002FA7)](https://github.com/joellattmann/gganimslide/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-002FA7.svg)](LICENSE)
 <!-- badges: end -->
 
@@ -33,16 +33,19 @@ https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129
 
 
 ```r
-p <- ggplot(df, aes(x, y)) +
-  geom_hline(yintercept = 0) +     # 1
-  geom_vline(xintercept = 0) +     # 2
-  geom_point(aes(colour = g)) +    # 3
-  geom_smooth(method = "lm") +     # 4
-  annotate("text", 2, -1.5, label = "beta = 0.6") +  # 5
-  geom_rug()                       # 6
+library(gganimslide); library(ggplot2)
 
-ggppt(p, "plot.pptx", animate = c(3, 4, 5), title = "My plot")
-ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_frame.tex")
+p <- ggplot(df, aes(x, y)) +
+  geom_hline(yintercept = 0) +                       # 1
+  geom_vline(xintercept = 0) +                       # 2
+  geom_point(aes(colour = g)) +                      # 3
+  geom_smooth(method = "lm") +                       # 4
+  annotate("text", 2, -1.5, label = "beta = 0.6") +  # 5
+  geom_rug()                                         # 6
+
+ggppt(p, "plot.pptx", animate = c(3, 4, 5), title = "My plot") # powerpoint
+
+ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_frame.tex") # latex beamer
 ```
 
 `animate` lists the layers at which a new step starts. Everything before the first number is shown from the start, and the last number also brings everything after it. For the plot above, `animate = c(3, 4, 5)` gives:
@@ -58,6 +61,16 @@ ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_fr
 
 **Removing a step again:** a negative number makes the step that started at that layer disappear, e.g., `animate = c(3, 4, 5, -3)` shows 3, 4, 5+ and then removes layer 3 again. In PowerPoint the `effect` for that entry is used as the exit animation (`"fade"` fades it out, `"wipe_left"` wipes it away); in beamer the layer is simply gone on the next overlay. `effect`, `trigger` and `duration` count removals as steps too.
 
+## Groups one by one: `categorical = TRUE`
+
+With `categorical = TRUE`, every **group** within a step is revealed on its own: each bar, each box, each colour group or line from a `colour =`/`fill =` mapping, in group order. The step's `effect`, `trigger` and `duration` apply to each group, and a negative number removes all groups of that step at once.
+
+```r
+bars <- ggplot(mpg, aes(class, fill = class)) + geom_bar()
+
+ggppt(bars, "bars.pptx", categorical = TRUE, effect = "fade") # one bar per click
+```
+
 ## Functions
 
 | function | what it's for |
@@ -68,7 +81,6 @@ ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_fr
 | `plot_components()` | shows which number each part of a plot has under each `scope` |
 | `animation_steps()` | previews how an `animate` vector is split into steps, e.g., `animation_steps(6, c(3, 4, 5))` |
 | `steps()` | fallback: stores the component order for plots made without gganimslide loaded |
-
 
 ## scope: what the numbers count
 
@@ -84,12 +96,15 @@ A finished ggplot normally forgets the order of its components, so while gganims
 
 ```r
 library(gganimslide)
+
 p <- ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +                    # 1
   labs(title = "Fuel use") +        # 2
   theme_minimal() +                 # 3
   geom_smooth(method = "lm")        # 4
-plot_components(p)                  # shows the numbering for each scope
+
+plot_components(p) # shows the numbering for each scope
+
 ggppt(p, "fuel.pptx", animate = c(2, 3, 4), scope = "all")
 ```
 
@@ -108,7 +123,7 @@ In these modes each step is a full redraw (titles or themes can change the layou
 * Build a deck with several plots:
 
 ```r
-doc <- ppt_deck()          # 16:9; or ppt_deck(template = "my_template.pptx")
+doc <- ppt_deck() # 16:9; or ppt_deck(template = "my_template.pptx")
 doc <- ggppt(p1, doc = doc, animate = c(3, 4), title = "First")
 doc <- ggppt(p2, doc = doc, effect = "fade", title = "Second")
 print(doc, target = "talk.pptx")
