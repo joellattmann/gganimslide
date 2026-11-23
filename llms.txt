@@ -39,8 +39,6 @@ and `geom_smooth(method = "lm")`:
 
 ![Example plot](reference/figures/plotex.png)
 
-Example plot
-
 For simplicity, all arguments except for the plot and the file name can
 be left blank. Thus, the minimal version to turn this into an animated
 PowerPoint slide looks like this:
@@ -71,8 +69,6 @@ already present, and one click adds
 [`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html).
 
 ![ggppt examples](reference/figures/ggppt_examples.png)
-
-ggppt examples
 
 The following code shows how a more elaborate animation with
 [`ggppt()`](https://joellattmann.github.io/gganimslide/reference/ggppt.md)

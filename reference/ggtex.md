@@ -123,8 +123,8 @@ ggtex(p, out, animate = c(2, 3), title = "Fuel use")
 #> \begin{frame}{Fuel use}
 #>   \centering
 #>   % gganimslide: static 1 | 2 geom_smooth | 3 geom_point
-#>   \only<1>{\includegraphics[width=\linewidth,page=1]{/tmp/RtmphcNF9T/file190065e301d1.pdf}}%
-#>   \only<2>{\includegraphics[width=\linewidth,page=2]{/tmp/RtmphcNF9T/file190065e301d1.pdf}}%
-#>   \only<3->{\includegraphics[width=\linewidth,page=3]{/tmp/RtmphcNF9T/file190065e301d1.pdf}}%
+#>   \only<1>{\includegraphics[width=\linewidth,page=1]{/tmp/RtmpJu6alI/file18f077f875d6.pdf}}%
+#>   \only<2>{\includegraphics[width=\linewidth,page=2]{/tmp/RtmpJu6alI/file18f077f875d6.pdf}}%
+#>   \only<3->{\includegraphics[width=\linewidth,page=3]{/tmp/RtmpJu6alI/file18f077f875d6.pdf}}%
 #> \end{frame} 
 ```
