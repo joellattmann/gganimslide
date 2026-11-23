@@ -30,8 +30,6 @@ ggppt(p, "savings.pptx",
       duration = c(1, 2.5, 0.5, 2.5, 0.5, 0.6, 0.6))
 ```
 
-<https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129>
-
 ``` r
 
 library(gganimslide); library(ggplot2)
