@@ -5,6 +5,7 @@
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![GitHub release](https://img.shields.io/github/v/release/joellattmann/gganimslide?include_prereleases&color=002FA7)](https://github.com/joellattmann/gganimslide/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-002FA7.svg)](LICENSE)
+[![pkgdown](https://img.shields.io/badge/docs-pkgdown-002FA7.svg)](https://joellattmann.github.io/gganimslide)
 <!-- badges: end -->
 
 Reveal the layers of a saved ggplot step by step, in **PowerPoint** or **LaTeX beamer**.
@@ -33,7 +34,7 @@ ggppt(p, "savings.pptx",
 
 
 
-https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129
+<video src="https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129" controls muted loop width="100%"></video>
 
 
 
