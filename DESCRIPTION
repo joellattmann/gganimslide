@@ -11,7 +11,7 @@ Description: Turns a saved 'ggplot2' object into an animated slide in which
     writes a multi-page PDF plus 'LaTeX' 'beamer' overlay code. All steps are
     cut from one rendered plot, so axes and layers never shift between steps.
 License: MIT + file LICENSE
-URL: https://github.com/joellattmann/gganimslide
+URL: https://github.com/joellattmann/gganimslide, https://joellattmann.github.io/gganimslide/
 BugReports: https://github.com/joellattmann/gganimslide/issues
 Encoding: UTF-8
 Depends: R (>= 4.1)
@@ -27,4 +27,3 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
-
