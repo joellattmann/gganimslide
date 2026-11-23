@@ -41,7 +41,7 @@ myplot <- mtcars |>
 
 This plot has two layers, `geom_point()` and `geom_smooth(method = "lm")`:
 
-![Example plot](man/figures/plotex.png)
+<img src="man/figures/plotex.png" alt="Example plot" width="100%">
 
 For simplicity, all arguments except for the plot and the file name can be left blank. Thus, the minimal version to turn this into an animated PowerPoint slide looks like this:
 
@@ -59,7 +59,7 @@ ggppt(myplot, "mpg_hp.pptx", animate = c(1, 2))
 
 All the options shown in the following figure produce exactly one slide. The frames compare the animation steps created for each example. With `animate = c(1)`, the animation starts at the first layer: the slide opens with only the axes, and one click reveals both layers. With `animate = c(2)`, the animation starts at the second layer: the slide opens with `geom_point()` already present, and one click adds `geom_smooth()`.
 
-![ggppt examples](man/figures/ggppt_examples.png)
+<img src="man/figures/ggppt_examples.png" alt="ggppt examples" width="100%">
 
 The following code shows how a more elaborate animation with `ggppt()` works for a plot `p`. In `animate = `, positive numbers mark the layer at which a step *animates in* (each step runs up to the next number); negative numbers *animate out* the step that started at that layer.
 
