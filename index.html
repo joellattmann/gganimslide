@@ -58,88 +58,93 @@
 </div>
 <!-- badges: start -->
 
-<p>Reveal the layers of a saved ggplot step by step, in <strong>PowerPoint</strong> or <strong>LaTeX beamer</strong>.</p>
+<p><code>gganimslide</code> lets you animate the layers of your ggplots for <strong>PowerPoint</strong> or <strong>LaTeX beamer</strong> presentations. In PowerPoint, the layers become editable vector shapes, allowing for further customisation after the slide has been created with <code><a href="reference/ggppt.html">ggppt()</a></code>. Native PowerPoint animations are written into the slide. <code><a href="reference/ggtex.html">ggtex()</a></code> writes a multi-page PDF and the frame code as a <code>.tex</code> file.</p>
+<div class="section level3">
+<h3 id="installing-gganimslide">Installing <code>gganimslide</code>
+<a class="anchor" aria-label="anchor" href="#installing-gganimslide"></a>
+</h3>
 <!-- Install from CRAN:
 ```r
 install.packages("gganimslide")
+# dependencies (`ggplot2`, `officer`, `rvg`, `xml2`) are installed automatically
 ```
 
 Or get the development version: -->
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"joellattmann/gganimslide"</span><span class="op">)</span></span></code></pre></div>
-<p>All dependencies (<code>ggplot2</code>, <code>officer</code>, <code>rvg</code>, <code>xml2</code>) are installed automatically.</p>
-<p>The following code creates a PowerPoint presentation in your working directory that animates the layers (e.g., geoms) of a <code>ggplot2</code> object (p). Positive numbers in <code>animate</code> mark the layer at which a step <em>animates in</em> (each step runs up to the next number); negative numbers <em>animate out</em> the step that started at that layer. Except for the plot and the file name, all arguments can be left blank, using the defaults: every layer of the plot <em>appears</em> on <em>click</em>, while axes, titles and legend are shown from the start.</p>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"joellattmann/gganimslide"</span><span class="op">)</span> </span>
+<span><span class="co"># dependencies (`ggplot2`, `officer`, `rvg`, `xml2`) are installed automatically</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="the-basics-ggppt-and-ggtex">The basics: <code>ggppt()</code> and <code>ggtex()</code>
+<a class="anchor" aria-label="anchor" href="#the-basics-ggppt-and-ggtex"></a>
+</h3>
+<p>Consider the following example using R’s <code>mtcars</code> dataset:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">myplot</span> <span class="op">&lt;-</span> <span class="va">mtcars</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">mpg</span>, y <span class="op">=</span> <span class="va">hp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="co"># layer 1</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span> <span class="op">+</span> <span class="co"># layer 2</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>This plot has two layers, <code><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point()</a></code> and <code>geom_smooth(method = "lm")</code>:</p>
+<div class="float">
+<img src="reference/figures/plotex.png" alt="Example plot"><div class="figcaption">Example plot</div>
+</div>
+<p>For simplicity, all arguments except for the plot and the file name can be left blank. Thus, the minimal version to turn this into an animated PowerPoint slide looks like this:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/joellattmann/gganimslide" class="external-link">gganimslide</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">myplot</span>, <span class="st">"mpg_hp.pptx"</span><span class="op">)</span> <span class="co"># powerpoint</span></span></code></pre></div>
+<p>Not specifying the <code>animate =</code> argument corresponds to listing, and consequently animating, every layer of the plot, so this is the same as:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">myplot</span>, <span class="st">"mpg_hp.pptx"</span>, animate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>All the options shown in the following figure produce exactly one slide. The frames compare the animation steps created for each example. With <code>animate = c(1)</code>, the animation starts at the first layer: the slide opens with only the axes, and one click reveals both layers. With <code>animate = c(2)</code>, the animation starts at the second layer: the slide opens with <code><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point()</a></code> already present, and one click adds <code><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth()</a></code>.</p>
+<div class="float">
+<img src="reference/figures/ggppt_examples.png" alt="ggppt examples"><div class="figcaption">ggppt examples</div>
+</div>
+<p>The following code shows how a more elaborate animation with <code><a href="reference/ggppt.html">ggppt()</a></code> works for a plot <code>p</code>. In <code>animate =</code>, positive numbers mark the layer at which a step <em>animates in</em> (each step runs up to the next number); negative numbers <em>animate out</em> the step that started at that layer.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">p</span>, <span class="st">"savings.pptx"</span>,</span>
 <span>      animate  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">6</span>, <span class="fl">8</span>, <span class="op">-</span><span class="fl">8</span><span class="op">)</span>,</span>
 <span>      effect   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"wipe_up"</span>, <span class="st">"wipe_left"</span>, <span class="st">"fade"</span>, <span class="st">"wipe_left"</span>, <span class="st">"fade"</span>, <span class="st">"fade"</span>, <span class="st">"fade"</span><span class="op">)</span>,</span>
 <span>      trigger  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"click"</span>, <span class="st">"click"</span>, <span class="st">"after"</span>, <span class="st">"click"</span>, <span class="st">"after"</span>, <span class="st">"click"</span>, <span class="st">"click"</span><span class="op">)</span>,</span>
 <span>      duration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2.5</span>, <span class="fl">0.5</span>, <span class="fl">2.5</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">0.6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<video src="https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129" controls muted loop width="100%"></video><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/joellattmann/gganimslide" class="external-link">gganimslide</a></span><span class="op">)</span>; <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span>                       <span class="co"># 1</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span>                       <span class="co"># 2</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="va">g</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>                      <span class="co"># 3</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span> <span class="op">+</span>                       <span class="co"># 4</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1.5</span>, label <span class="op">=</span> <span class="st">"beta = 0.6"</span><span class="op">)</span> <span class="op">+</span>  <span class="co"># 5</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_rug.html" class="external-link">geom_rug</a></span><span class="op">(</span><span class="op">)</span>                                         <span class="co"># 6</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">p</span>, <span class="st">"plot.pptx"</span>, animate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"My plot"</span><span class="op">)</span> <span class="co"># powerpoint</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/ggtex.html">ggtex</a></span><span class="op">(</span><span class="va">p</span>, <span class="st">"fig/plot.pdf"</span>, animate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"My plot"</span>, tex <span class="op">=</span> <span class="st">"plot_frame.tex"</span><span class="op">)</span> <span class="co"># latex beamer</span></span></code></pre></div>
-<p><code>animate</code> lists the layers at which a new step starts. Everything before the first number is shown from the start, and the last number also brings everything after it. For the plot above, <code>animate = c(3, 4, 5)</code> gives:</p>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr>
-<th>PowerPoint</th>
-<th>beamer</th>
-<th>shown</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>slide opens</td>
-<td>overlay 1</td>
-<td>axes, legend, layers 1–2</td>
-</tr>
-<tr>
-<td>click 1</td>
-<td>overlay 2</td>
-<td>+ layer 3</td>
-</tr>
-<tr>
-<td>click 2</td>
-<td>overlay 3</td>
-<td>+ layer 4</td>
-</tr>
-<tr>
-<td>click 3</td>
-<td>overlay 4</td>
-<td>+ layer 5 <strong>and everything after it</strong> (here: 6)</td>
-</tr>
-</tbody>
-</table>
-<p><code>animate = NULL</code> (default) reveals every layer on its own.</p>
-<p><strong>Removing a step again:</strong> a negative number makes the step that started at that layer disappear, e.g., <code>animate = c(3, 4, 5, -3)</code> shows 3, 4, 5+ and then removes layer 3 again. In PowerPoint the <code>effect</code> for that entry is used as the exit animation (<code>"fade"</code> fades it out, <code>"wipe_left"</code> wipes it away); in beamer the layer is simply gone on the next overlay. <code>effect</code>, <code>trigger</code> and <code>duration</code> count removals as steps too.</p>
-<div class="section level2">
-<h2 id="groups-one-by-one-categorical--true">Groups one by one: <code>categorical = TRUE</code>
-<a class="anchor" aria-label="anchor" href="#groups-one-by-one-categorical--true"></a>
-</h2>
-<p>With <code>categorical = TRUE</code>, every <strong>group</strong> within a step is revealed on its own: each bar, each box, each colour group or line from a <code>colour =</code>/<code>fill =</code> mapping, in group order. The step’s <code>effect</code>, <code>trigger</code> and <code>duration</code> apply to each group, and a negative number removes all groups of that step at once.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">mpg</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">class</span>, fill <span class="op">=</span> <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">bars</span>, <span class="st">"bars.pptx"</span>, categorical <span class="op">=</span> <span class="cn">TRUE</span>, effect <span class="op">=</span> <span class="st">"fade"</span><span class="op">)</span> <span class="co"># one bar per click</span></span></code></pre></div>
+<p>The result is one slide. It looks like this:</p>
+<video src="https://github.com/user-attachments/assets/966ea13b-3aa7-42e7-884b-91388e662129" controls muted loop width="100%"></video><p>The defaults for the main arguments are as follows:</p>
+<ul>
+<li>
+<code>animate =</code>: all layers are animated, corresponding to a vector enumerating all layers of the plot</li>
+<li>
+<code>effect =</code>: <code>"appear"</code>
+</li>
+<li>
+<code>trigger =</code>: <code>"click"</code>
+</li>
+<li>
+<code>duration =</code>: 0.5 seconds (<code>duration =</code> has no effect if <code>"appear"</code> is chosen)</li>
+</ul>
+<p>To create a LaTeX beamer presentation instead, use <code><a href="reference/ggtex.html">ggtex()</a></code>:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/ggtex.html">ggtex</a></span><span class="op">(</span><span class="va">myplot</span>, <span class="st">"fig/mpg_hp.pdf"</span>, animate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, tex <span class="op">=</span> <span class="st">"mpg_hp.tex"</span><span class="op">)</span> <span class="co"># latex beamer</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
-</h2>
+<div class="section level3">
+<h3 id="within-layer-animations-categorical--true">Within-layer animations: <code>categorical = TRUE</code>
+<a class="anchor" aria-label="anchor" href="#within-layer-animations-categorical--true"></a>
+</h3>
+<p>With <code>categorical = TRUE</code>, every <strong>group</strong> within a step is revealed on its own: each bar, each box, each colour group or line from a <code>colour =</code>/<code>fill =</code> mapping, in group order. The step’s <code>effect =</code>, <code>trigger =</code> and <code>duration =</code> apply to each group, and a negative number removes all groups of that step at once.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mybarplot</span> <span class="op">&lt;-</span> <span class="va">mtcars</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">mybarplot</span>, <span class="st">"cyl_count.pptx"</span>, categorical <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># one bar per click</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a>
+</h3>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -165,12 +170,12 @@ Or get the development version: -->
 </tr>
 <tr>
 <td><code><a href="reference/plot_components.html">plot_components()</a></code></td>
-<td>shows which number each part of a plot has under each <code>scope</code>
+<td>shows which number each part of a plot has under each <code>scope =</code>
 </td>
 </tr>
 <tr>
 <td><code><a href="reference/animation_steps.html">animation_steps()</a></code></td>
-<td>previews how an <code>animate</code> vector is split into steps, e.g., <code>animation_steps(6, c(3, 4, 5))</code>
+<td>previews how an <code>animate =</code> vector is split into steps, e.g., <code>animation_steps(6, c(3, 4, 5))</code>
 </td>
 </tr>
 <tr>
@@ -181,10 +186,10 @@ Or get the development version: -->
 </tbody>
 </table>
 </div>
-<div class="section level2">
-<h2 id="scope-what-the-numbers-count">scope: what the numbers count<a class="anchor" aria-label="anchor" href="#scope-what-the-numbers-count"></a>
-</h2>
-<p>By default (<code>scope = "layers"</code>) the numbers only count geoms, stats and <code><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate()</a></code>; axes, titles, legend and theme are always shown. Two more options let you reveal <em>any</em> <code>+</code> component:</p>
+<div class="section level3">
+<h3 id="the-scope--argument-what-the-numbers-in-animate--count">The <code>scope =</code> argument: what the numbers in <code>animate =</code> count<a class="anchor" aria-label="anchor" href="#the-scope--argument-what-the-numbers-in-animate--count"></a>
+</h3>
+<p>Except for teaching purposes, you may not want to reveal, i.e., animate, anything other than the plot layers. With the default <code>scope = "layers"</code>, only geoms, stats and <code><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate()</a></code> are counted as possible animation steps. Axes, titles, legend and theme are always shown. Two more options let you reveal <em>any</em> <code>+</code> component:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -211,80 +216,31 @@ Or get the development version: -->
 </tr>
 </tbody>
 </table>
-<p>A finished ggplot forgets the order in which its components were added, so for <code>"all"</code> and <code>"all_but_theme"</code> the package needs that order. Either wrap the plot code in <code><a href="reference/steps.html">steps()</a></code> when you make the plot (the order is stored in the object and survives <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> / <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/steps.html">steps</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">wt</span>, <span class="va">mpg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>                    <span class="co"># 1</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Fuel use"</span><span class="op">)</span> <span class="op">+</span>        <span class="co"># 2</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>                 <span class="co"># 3</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span>        <span class="co"># 4</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/plot_components.html">plot_components</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="co"># shows the numbering for each scope</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">p</span>, <span class="st">"fuel.pptx"</span>, animate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, scope <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
-<p>or write the plot code directly into the call:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">wt</span>, <span class="va">mpg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Fuel use"</span><span class="op">)</span>,</span>
-<span>      <span class="st">"fuel.pptx"</span>, animate <span class="op">=</span> <span class="fl">2</span>, scope <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
-<p>With the default <code>scope = "layers"</code> (and with <code>categorical = TRUE</code>) none of this is needed: any saved ggplot works as it is.</p>
-<p>In these modes each step is a full redraw (titles or themes can change the layout), so in PowerPoint every step covers the previous one; set <code>bg</code> to your slide background if it isn’t white.</p>
+<p>A finished ggplot forgets the order in which its components were added, so for <code>"all"</code> and <code>"all_but_theme"</code> the package needs that order. Either wrap the plot code in <code><a href="reference/steps.html">steps()</a></code> when you make the plot (the order is stored in the object and survives <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> / <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>), or write the plot code directly into the <code><a href="reference/ggppt.html">ggppt()</a></code>/<code><a href="reference/ggtex.html">ggtex()</a></code> call. The helper function <code><a href="reference/plot_components.html">plot_components()</a></code> shows how the components are numbered under each scope.</p>
 </div>
-<div class="section level2">
-<h2 id="ggppt-powerpoint">ggppt(): PowerPoint<a class="anchor" aria-label="anchor" href="#ggppt-powerpoint"></a>
-</h2>
-<ul>
-<li>The plot becomes a stack of <strong>editable vector shapes</strong> at the same position: one base shape (axes, grid, legend, titles, static layers) plus one transparent shape per step.</li>
-<li>
-<strong>Native PowerPoint animations</strong> are written into the slide, so there is nothing to set up by hand. The shapes are named in the Selection Pane (e.g., <code>step 2: layer 4 geom_smooth</code>), and you can still change the effects in PowerPoint’s Animation Pane.</li>
-<li>
-<code>effect</code>: <code>"appear"</code> (default), <code>"fade"</code>, <code>"wipe_left"</code>, <code>"wipe_right"</code>, <code>"wipe_up"</code>, <code>"wipe_down"</code>. Give one value, or one per step.</li>
-<li>
-<code>size</code>: <code>"16:9"</code> (default) or <code>"4:3"</code> for new decks; a <code>template</code> keeps its own size.</li>
-<li>
-<code>width</code>, <code>height</code>, <code>left</code>, <code>top</code>: size and position of the plot in inches (default: the area below the title; the plot is centred unless <code>left</code>/<code>top</code> are given). <strong>Set the size here, not by dragging in PowerPoint:</strong> dragging doesn’t scale the text, and resizing a single step’s shape misaligns it with the others.</li>
-<li>
-<code>trigger</code>: <code>"click"</code> (default), <code>"after"</code>, <code>"with"</code>. Give one value, or one per step.</li>
-<li>Build a deck with several plots:</li>
-</ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="section level3">
+<h3 id="slide-decks">Slide decks<a class="anchor" aria-label="anchor" href="#slide-decks"></a>
+</h3>
+<p>You can also build a deck with several plots:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ppt_deck.html">ppt_deck</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># 16:9; or ppt_deck(template = "my_template.pptx")</span></span>
 <span><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">p1</span>, doc <span class="op">=</span> <span class="va">doc</span>, animate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, title <span class="op">=</span> <span class="st">"First"</span><span class="op">)</span></span>
 <span><span class="va">doc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ggppt.html">ggppt</a></span><span class="op">(</span><span class="va">p2</span>, doc <span class="op">=</span> <span class="va">doc</span>, effect <span class="op">=</span> <span class="st">"fade"</span>, title <span class="op">=</span> <span class="st">"Second"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">doc</span>, target <span class="op">=</span> <span class="st">"talk.pptx"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="ggtex-beamer">ggtex(): beamer<a class="anchor" aria-label="anchor" href="#ggtex-beamer"></a>
-</h2>
+<div class="section level3">
+<h3 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
+</h3>
 <ul>
-<li>Writes a multi-page PDF: page 1 = static part, page k+1 = static part + first k steps. All pages are cut from <strong>one</strong> rendered plot, so nothing shifts between overlays.</li>
-<li>Prints (and with <code>tex =</code> writes) the frame code:</li>
-</ul>
-<div class="sourceCode" id="cb8"><pre class="sourceCode latex"><code class="sourceCode latex"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="kw">\begin</span>{<span class="ex">frame</span>}{My plot}</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="fu">\centering</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">\only</span>&lt;1&gt;{<span class="bu">\includegraphics</span>[width=<span class="fu">\linewidth</span>,page=1]{<span class="ex">fig/plot.pdf</span>}}<span class="co">%</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">\only</span>&lt;2&gt;{<span class="bu">\includegraphics</span>[width=<span class="fu">\linewidth</span>,page=2]{<span class="ex">fig/plot.pdf</span>}}<span class="co">%</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">\only</span>&lt;3&gt;{<span class="bu">\includegraphics</span>[width=<span class="fu">\linewidth</span>,page=3]{<span class="ex">fig/plot.pdf</span>}}<span class="co">%</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="fu">\only</span>&lt;4-&gt;{<span class="bu">\includegraphics</span>[width=<span class="fu">\linewidth</span>,page=4]{<span class="ex">fig/plot.pdf</span>}}<span class="co">%</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="kw">\end</span>{<span class="ex">frame</span>}</span></code></pre></div>
-<ul>
-<li>Use it in your deck with <code>\input{plot_frame.tex}</code>. <code>standalone = TRUE</code> gives a complete compilable document instead.</li>
-<li>Set <code>width</code>/<code>height</code> (inches) to the size the plot has on the slide so font sizes match. The default 5.5 × 3 fits a 16:9 beamer frame.</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
-</h2>
-<ul>
-<li>Supports standard ggplot2 panels (any geom, <code>facet_wrap</code>/<code>facet_grid</code>, <code>coord_cartesian</code>/<code>coord_flip</code>). Exotic extensions that change the panel structure give a clear error.</li>
+<li>Supports standard <code>ggplot2</code> panels (any geom, <code><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap()</a></code>/<code><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid()</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian()</a></code>/<code><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip()</a></code>). Exotic extensions that change the panel structure give a clear error.</li>
 <li>The legend belongs to the static part, so it is visible from the start.</li>
 </ul>
 </div>
-<div class="section level2">
-<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
-</h2>
-<p>If you use gganimslide in your work, please cite it:</p>
+<div class="section level3">
+<h3 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h3>
+<p>If you use <code>gganimslide</code> in your work, please cite it:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"gganimslide"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>

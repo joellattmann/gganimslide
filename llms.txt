@@ -1,25 +1,84 @@
 # gganimslide
 
-Reveal the layers of a saved ggplot step by step, in **PowerPoint** or
-**LaTeX beamer**.
+`gganimslide` lets you animate the layers of your ggplots for
+**PowerPoint** or **LaTeX beamer** presentations. In PowerPoint, the
+layers become editable vector shapes, allowing for further customisation
+after the slide has been created with
+[`ggppt()`](https://joellattmann.github.io/gganimslide/reference/ggppt.md).
+Native PowerPoint animations are written into the slide.
+[`ggtex()`](https://joellattmann.github.io/gganimslide/reference/ggtex.md)
+writes a multi-page PDF and the frame code as a `.tex` file.
+
+### Installing `gganimslide`
 
 ``` r
 
 # install.packages("remotes")
-remotes::install_github("joellattmann/gganimslide")
+remotes::install_github("joellattmann/gganimslide") 
+# dependencies (`ggplot2`, `officer`, `rvg`, `xml2`) are installed automatically
 ```
 
-All dependencies (`ggplot2`, `officer`, `rvg`, `xml2`) are installed
-automatically.
+### The basics: `ggppt()` and `ggtex()`
 
-The following code creates a PowerPoint presentation in your working
-directory that animates the layers (e.g., geoms) of a `ggplot2` object
-(p). Positive numbers in `animate` mark the layer at which a step
-*animates in* (each step runs up to the next number); negative numbers
-*animate out* the step that started at that layer. Except for the plot
-and the file name, all arguments can be left blank, using the defaults:
-every layer of the plot *appears* on *click*, while axes, titles and
-legend are shown from the start.
+Consider the following example using R’s `mtcars` dataset:
+
+``` r
+
+library(ggplot2)
+
+myplot <- mtcars |> 
+  ggplot(aes(x = mpg, y = hp)) + 
+  geom_point() + # layer 1
+  geom_smooth(method = "lm") + # layer 2
+  theme_bw()
+```
+
+This plot has two layers,
+[`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
+and `geom_smooth(method = "lm")`:
+
+![Example plot](reference/figures/plotex.png)
+
+Example plot
+
+For simplicity, all arguments except for the plot and the file name can
+be left blank. Thus, the minimal version to turn this into an animated
+PowerPoint slide looks like this:
+
+``` r
+
+library(gganimslide)
+
+ggppt(myplot, "mpg_hp.pptx") # powerpoint
+```
+
+Not specifying the `animate =` argument corresponds to listing, and
+consequently animating, every layer of the plot, so this is the same as:
+
+``` r
+
+ggppt(myplot, "mpg_hp.pptx", animate = c(1, 2))
+```
+
+All the options shown in the following figure produce exactly one slide.
+The frames compare the animation steps created for each example. With
+`animate = c(1)`, the animation starts at the first layer: the slide
+opens with only the axes, and one click reveals both layers. With
+`animate = c(2)`, the animation starts at the second layer: the slide
+opens with
+[`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
+already present, and one click adds
+[`geom_smooth()`](https://ggplot2.tidyverse.org/reference/geom_smooth.html).
+
+![ggppt examples](reference/figures/ggppt_examples.png)
+
+ggppt examples
+
+The following code shows how a more elaborate animation with
+[`ggppt()`](https://joellattmann.github.io/gganimslide/reference/ggppt.md)
+works for a plot `p`. In `animate =`, positive numbers mark the layer at
+which a step *animates in* (each step runs up to the next number);
+negative numbers *animate out* the step that started at that layer.
 
 ``` r
 
@@ -30,77 +89,62 @@ ggppt(p, "savings.pptx",
       duration = c(1, 2.5, 0.5, 2.5, 0.5, 0.6, 0.6))
 ```
 
+The result is one slide. It looks like this:
+
+The defaults for the main arguments are as follows:
+
+- `animate =`: all layers are animated, corresponding to a vector
+  enumerating all layers of the plot
+- `effect =`: `"appear"`
+- `trigger =`: `"click"`
+- `duration =`: 0.5 seconds (`duration =` has no effect if `"appear"` is
+  chosen)
+
+To create a LaTeX beamer presentation instead, use
+[`ggtex()`](https://joellattmann.github.io/gganimslide/reference/ggtex.md):
+
 ``` r
 
-library(gganimslide); library(ggplot2)
-
-p <- ggplot(df, aes(x, y)) +
-  geom_hline(yintercept = 0) +                       # 1
-  geom_vline(xintercept = 0) +                       # 2
-  geom_point(aes(colour = g)) +                      # 3
-  geom_smooth(method = "lm") +                       # 4
-  annotate("text", 2, -1.5, label = "beta = 0.6") +  # 5
-  geom_rug()                                         # 6
-
-ggppt(p, "plot.pptx", animate = c(3, 4, 5), title = "My plot") # powerpoint
-
-ggtex(p, "fig/plot.pdf", animate = c(3, 4, 5), title = "My plot", tex = "plot_frame.tex") # latex beamer
+ggtex(myplot, "fig/mpg_hp.pdf", animate = c(2), tex = "mpg_hp.tex") # latex beamer
 ```
 
-`animate` lists the layers at which a new step starts. Everything before
-the first number is shown from the start, and the last number also
-brings everything after it. For the plot above, `animate = c(3, 4, 5)`
-gives:
-
-| PowerPoint  | beamer    | shown                                            |
-|-------------|-----------|--------------------------------------------------|
-| slide opens | overlay 1 | axes, legend, layers 1–2                         |
-| click 1     | overlay 2 | \+ layer 3                                       |
-| click 2     | overlay 3 | \+ layer 4                                       |
-| click 3     | overlay 4 | \+ layer 5 **and everything after it** (here: 6) |
-
-`animate = NULL` (default) reveals every layer on its own.
-
-**Removing a step again:** a negative number makes the step that started
-at that layer disappear, e.g., `animate = c(3, 4, 5, -3)` shows 3, 4, 5+
-and then removes layer 3 again. In PowerPoint the `effect` for that
-entry is used as the exit animation (`"fade"` fades it out,
-`"wipe_left"` wipes it away); in beamer the layer is simply gone on the
-next overlay. `effect`, `trigger` and `duration` count removals as steps
-too.
-
-## Groups one by one: `categorical = TRUE`
+### Within-layer animations: `categorical = TRUE`
 
 With `categorical = TRUE`, every **group** within a step is revealed on
 its own: each bar, each box, each colour group or line from a
-`colour =`/`fill =` mapping, in group order. The step’s `effect`,
-`trigger` and `duration` apply to each group, and a negative number
+`colour =`/`fill =` mapping, in group order. The step’s `effect =`,
+`trigger =` and `duration =` apply to each group, and a negative number
 removes all groups of that step at once.
 
 ``` r
 
-bars <- ggplot(mpg, aes(class, fill = class)) + geom_bar()
+mybarplot <- mtcars |> 
+  ggplot(aes(x = factor(cyl))) + 
+  geom_bar() +
+  theme_bw()
 
-ggppt(bars, "bars.pptx", categorical = TRUE, effect = "fade") # one bar per click
+ggppt(mybarplot, "cyl_count.pptx", categorical = TRUE) # one bar per click
 ```
 
-## Functions
+### Functions
 
 | function | what it’s for |
 |----|----|
 | [`ggppt()`](https://joellattmann.github.io/gganimslide/reference/ggppt.md) | animated PowerPoint slide |
 | [`ggtex()`](https://joellattmann.github.io/gganimslide/reference/ggtex.md) | animated beamer slide (multi-page PDF + LaTeX code) |
 | [`ppt_deck()`](https://joellattmann.github.io/gganimslide/reference/ppt_deck.md) | new 16:9 deck to collect several plots with `ggppt(doc = ...)` |
-| [`plot_components()`](https://joellattmann.github.io/gganimslide/reference/plot_components.md) | shows which number each part of a plot has under each `scope` |
-| [`animation_steps()`](https://joellattmann.github.io/gganimslide/reference/animation_steps.md) | previews how an `animate` vector is split into steps, e.g., `animation_steps(6, c(3, 4, 5))` |
+| [`plot_components()`](https://joellattmann.github.io/gganimslide/reference/plot_components.md) | shows which number each part of a plot has under each `scope =` |
+| [`animation_steps()`](https://joellattmann.github.io/gganimslide/reference/animation_steps.md) | previews how an `animate =` vector is split into steps, e.g., `animation_steps(6, c(3, 4, 5))` |
 | [`steps()`](https://joellattmann.github.io/gganimslide/reference/steps.md) | stores the component order of a saved plot, needed for `scope = "all"` / `"all_but_theme"` |
 
-## scope: what the numbers count
+### The `scope =` argument: what the numbers in `animate =` count
 
-By default (`scope = "layers"`) the numbers only count geoms, stats and
-[`annotate()`](https://ggplot2.tidyverse.org/reference/annotate.html);
-axes, titles, legend and theme are always shown. Two more options let
-you reveal *any* `+` component:
+Except for teaching purposes, you may not want to reveal, i.e., animate,
+anything other than the plot layers. With the default
+`scope = "layers"`, only geoms, stats and
+[`annotate()`](https://ggplot2.tidyverse.org/reference/annotate.html)
+are counted as possible animation steps. Axes, titles, legend and theme
+are always shown. Two more options let you reveal *any* `+` component:
 
 | `scope` | numbers count |
 |----|----|
@@ -114,102 +158,38 @@ Either wrap the plot code in
 [`steps()`](https://joellattmann.github.io/gganimslide/reference/steps.md)
 when you make the plot (the order is stored in the object and survives
 [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) /
-[`readRDS()`](https://rdrr.io/r/base/readRDS.html)):
+[`readRDS()`](https://rdrr.io/r/base/readRDS.html)), or write the plot
+code directly into the
+[`ggppt()`](https://joellattmann.github.io/gganimslide/reference/ggppt.md)/[`ggtex()`](https://joellattmann.github.io/gganimslide/reference/ggtex.md)
+call. The helper function
+[`plot_components()`](https://joellattmann.github.io/gganimslide/reference/plot_components.md)
+shows how the components are numbered under each scope.
 
-``` r
+### Slide decks
 
-p <- steps(
-  ggplot(mtcars, aes(wt, mpg)) +
-    geom_point() +                    # 1
-    labs(title = "Fuel use") +        # 2
-    theme_minimal() +                 # 3
-    geom_smooth(method = "lm")        # 4
-)
-
-plot_components(p) # shows the numbering for each scope
-
-ggppt(p, "fuel.pptx", animate = c(2, 3, 4), scope = "all")
-```
-
-or write the plot code directly into the call:
-
-``` r
-
-ggppt(ggplot(mtcars, aes(wt, mpg)) + geom_point() + labs(title = "Fuel use"),
-      "fuel.pptx", animate = 2, scope = "all")
-```
-
-With the default `scope = "layers"` (and with `categorical = TRUE`) none
-of this is needed: any saved ggplot works as it is.
-
-In these modes each step is a full redraw (titles or themes can change
-the layout), so in PowerPoint every step covers the previous one; set
-`bg` to your slide background if it isn’t white.
-
-## ggppt(): PowerPoint
-
-- The plot becomes a stack of **editable vector shapes** at the same
-  position: one base shape (axes, grid, legend, titles, static layers)
-  plus one transparent shape per step.
-- **Native PowerPoint animations** are written into the slide, so there
-  is nothing to set up by hand. The shapes are named in the Selection
-  Pane (e.g., `step 2: layer 4 geom_smooth`), and you can still change
-  the effects in PowerPoint’s Animation Pane.
-- `effect`: `"appear"` (default), `"fade"`, `"wipe_left"`,
-  `"wipe_right"`, `"wipe_up"`, `"wipe_down"`. Give one value, or one per
-  step.
-- `size`: `"16:9"` (default) or `"4:3"` for new decks; a `template`
-  keeps its own size.
-- `width`, `height`, `left`, `top`: size and position of the plot in
-  inches (default: the area below the title; the plot is centred unless
-  `left`/`top` are given). **Set the size here, not by dragging in
-  PowerPoint:** dragging doesn’t scale the text, and resizing a single
-  step’s shape misaligns it with the others.
-- `trigger`: `"click"` (default), `"after"`, `"with"`. Give one value,
-  or one per step.
-- Build a deck with several plots:
+You can also build a deck with several plots:
 
 ``` r
 
 doc <- ppt_deck() # 16:9; or ppt_deck(template = "my_template.pptx")
 doc <- ggppt(p1, doc = doc, animate = c(3, 4), title = "First")
 doc <- ggppt(p2, doc = doc, effect = "fade", title = "Second")
+
 print(doc, target = "talk.pptx")
 ```
 
-## ggtex(): beamer
+### Limitations
 
-- Writes a multi-page PDF: page 1 = static part, page k+1 = static
-  part + first k steps. All pages are cut from **one** rendered plot, so
-  nothing shifts between overlays.
-- Prints (and with `tex =` writes) the frame code:
-
-``` latex
-\begin{frame}{My plot}
-  \centering
-  \only<1>{\includegraphics[width=\linewidth,page=1]{fig/plot.pdf}}%
-  \only<2>{\includegraphics[width=\linewidth,page=2]{fig/plot.pdf}}%
-  \only<3>{\includegraphics[width=\linewidth,page=3]{fig/plot.pdf}}%
-  \only<4->{\includegraphics[width=\linewidth,page=4]{fig/plot.pdf}}%
-\end{frame}
-```
-
-- Use it in your deck with `\input{plot_frame.tex}`. `standalone = TRUE`
-  gives a complete compilable document instead.
-- Set `width`/`height` (inches) to the size the plot has on the slide so
-  font sizes match. The default 5.5 × 3 fits a 16:9 beamer frame.
-
-## Limitations
-
-- Supports standard ggplot2 panels (any geom, `facet_wrap`/`facet_grid`,
-  `coord_cartesian`/`coord_flip`). Exotic extensions that change the
-  panel structure give a clear error.
+- Supports standard `ggplot2` panels (any geom,
+  [`facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html)/[`facet_grid()`](https://ggplot2.tidyverse.org/reference/facet_grid.html),
+  [`coord_cartesian()`](https://ggplot2.tidyverse.org/reference/coord_cartesian.html)/[`coord_flip()`](https://ggplot2.tidyverse.org/reference/coord_flip.html)).
+  Exotic extensions that change the panel structure give a clear error.
 - The legend belongs to the static part, so it is visible from the
   start.
 
-## Citation
+### Citation
 
-If you use gganimslide in your work, please cite it:
+If you use `gganimslide` in your work, please cite it:
 
 ``` r
 
