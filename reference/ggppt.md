@@ -1,0 +1,160 @@
+# Animated PowerPoint slide from a ggplot
+
+Puts a saved ggplot on a PowerPoint slide as a stack of editable vector
+shapes: one static base (axes, grid, legend, titles and the static
+layers) and one transparent shape per animation step, all at the same
+position. Native PowerPoint entrance animations are written for the
+steps, so in the slide show each step appears on click (or
+automatically).
+
+## Usage
+
+``` r
+ggppt(
+  p,
+  file = NULL,
+  animate = NULL,
+  scope = c("layers", "all", "all_but_theme"),
+  title = NULL,
+  effect = "appear",
+  trigger = "click",
+  duration = 0.5,
+  doc = NULL,
+  template = NULL,
+  size = c("16:9", "4:3"),
+  width = NULL,
+  height = NULL,
+  left = NULL,
+  top = NULL,
+  location = NULL,
+  editable = TRUE,
+  bg = "white",
+  categorical = FALSE,
+  ...
+)
+```
+
+## Arguments
+
+- p:
+
+  A saved ggplot object.
+
+- file:
+
+  Path of the \`.pptx\` to write. If \`doc\` is given and \`file\` is
+  \`NULL\`, nothing is written and the updated \`doc\` is returned.
+
+- animate:
+
+  Layers at which a new step starts. Layers before the first entry are
+  always shown; the last entry also reveals all later layers. \`animate
+  = c(3, 4, 5)\` shows layers 1-2, then adds 3, then 4, then 5 and
+  everything after it. \`NULL\` (default) reveals every layer on its
+  own. A negative number removes a step again: \`-3\` makes the step
+  that started at layer 3 disappear (with the given \`effect\` as exit
+  animation in PowerPoint), e.g. \`animate = c(3, 4, 5, -3)\`. Entries
+  play in the order given, and \`effect\`, \`trigger\` and \`duration\`
+  count removals as steps.
+
+- scope:
+
+  What the numbers in \`animate\` count: \`"layers"\` (default),
+  \`"all"\` or \`"all_but_theme"\`. See \[ggtex()\] for details. With
+  \`"all"\` and \`"all_but_theme"\` each step is a full redraw of the
+  plot (on a \`bg\` background) that covers the previous one, because
+  components such as titles or themes change the layout.
+
+- title:
+
+  Slide title. \`NULL\` for no title.
+
+- effect:
+
+  Entrance effect: \`"appear"\`, \`"fade"\`, \`"wipe_left"\`,
+  \`"wipe_right"\`, \`"wipe_up"\` or \`"wipe_down"\`. One value, or one
+  per step.
+
+- trigger:
+
+  \`"click"\` (default), \`"after"\` (after the previous step) or
+  \`"with"\` (with the previous step). One value, or one per step.
+
+- duration:
+
+  Effect duration in seconds (ignored for \`"appear"\`).
+
+- doc:
+
+  Optional existing \`rpptx\` object (from \[officer::read_pptx()\]) to
+  add the slide to. Lets you build a whole deck with several plots.
+
+- template:
+
+  Optional \`.pptx\` template whose theme and slide size are used for a
+  new deck.
+
+- size:
+
+  Slide size of a new deck when no \`template\` is given: \`"16:9"\`
+  (default) or \`"4:3"\`. Ignored when \`doc\` or \`template\` is given.
+
+- width, height:
+
+  Size of the plot on the slide in inches. Default: the free area below
+  the title. Set the size here rather than by dragging in PowerPoint:
+  dragging scales lines and points but not text, and resizing one step's
+  shape misaligns it with the others. A full 16:9 slide is 13.33 x 7.5
+  inches.
+
+- left, top:
+
+  Position of the plot's top-left corner in inches. Default: centred in
+  the free area below the title.
+
+- location:
+
+  Optional officer location for the plot (overrides \`width\`,
+  \`height\`, \`left\`, \`top\`), e.g. \`officer::ph_location(left = 1,
+  top = 1.5, width = 8, height = 5)\`. Defaults to the area below the
+  title.
+
+- editable:
+
+  If \`TRUE\`, the shapes and text of the plot can be edited in
+  PowerPoint.
+
+- bg:
+
+  Background of the full redraws used by \`"all"\` and
+  \`"all_but_theme"\`. Should match the slide background.
+
+- categorical:
+
+  If \`TRUE\`, every group within a step (each bar, box, colour group,
+  line of a \`colour =\` mapping, ...) is revealed on its own, in group
+  order. The step's \`effect\`, \`trigger\` and \`duration\` apply to
+  each group, and a negative number removes all groups of that step at
+  once. Only with \`scope = "layers"\`.
+
+- ...:
+
+  Further arguments for \[rvg::dml()\], e.g. \`fonts\`.
+
+## Value
+
+If \`file\` is given, its path (invisibly); otherwise the updated
+\`rpptx\` object.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+library(ggplot2)
+p <- ggplot(mtcars, aes(wt, mpg)) +
+  geom_point(colour = "grey70") +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  geom_point(data = subset(mtcars, mpg > 30), colour = "red")
+ggppt(p, "fuel.pptx", animate = c(2, 3), title = "Fuel use")
+} # }
+```
